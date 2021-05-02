@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.workstudy.mapper.CompanyMapper">
+    <resultMap id="BaseResultMap" type="com.workstudy.entity.Company">
+        <!--@mbg.generated-->
+        <!--@Table company-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="license" jdbcType="VARCHAR" property="license"/>
+        <result column="tax_number" jdbcType="VARCHAR" property="taxNumber"/>
+        <result column="introduction" jdbcType="VARCHAR" property="introduction"/>
+        <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="contact" jdbcType="VARCHAR" property="contact"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="salt" jdbcType="VARCHAR" property="salt"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, user_name, `password`, `name`, license, tax_number, introduction, address, contact,
+        phone, `status`, salt
+    </sql>
+
+    <!--根据公司名称查询公司-->
+    <select id="queryCompanyByUserName" resultMap="BaseResultMap">
+        select * from company where user_name=#{userName,jdbcType=VARCHAR} and status=1;
+    </select>
+</mapper>

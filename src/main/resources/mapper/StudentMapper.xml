@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.workstudy.mapper.StudentMapper">
+    <resultMap id="BaseResultMap" type="com.workstudy.entity.Student">
+        <!--@mbg.generated-->
+        <!--@Table student-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="student_number" jdbcType="VARCHAR" property="studentNumber"/>
+        <result column="password" jdbcType="VARCHAR" property="password"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="college" jdbcType="VARCHAR" property="college"/>
+        <result column="major" jdbcType="VARCHAR" property="major"/>
+        <result column="gender" jdbcType="TINYINT" property="gender"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="birthday" jdbcType="DATE" property="birthday"/>
+        <result column="student_id_card" jdbcType="VARCHAR" property="studentIdCard"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="salt" jdbcType="VARCHAR" property="salt"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, student_number, `password`, `name`, college, major, gender, phone, birthday,
+        student_id_card, `status`, salt
+    </sql>
+
+    <!--根据学号查询出该学生-->
+    <select id="queryStudentByStudentNumber" resultMap="BaseResultMap">
+        select * from student where student_number=#{studentNumber,jdbcType=VARCHAR} and status=1;
+    </select>
+
+</mapper>

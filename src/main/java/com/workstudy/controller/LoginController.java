@@ -39,9 +39,6 @@ import java.util.concurrent.TimeUnit;
 public class LoginController {
 
     @Autowired
-    private StudentService studentService;
-
-    @Autowired
     private StringRedisTemplate redisTemplate;
 
     /**
@@ -118,13 +115,11 @@ public class LoginController {
                 subject.login(usernamePasswordToken);
                 String token = subject.getSession().getId().toString();
                 ActiveUser activeUser = (ActiveUser) subject.getPrincipal();
-
                 //将token、用户信息和权限信息返回给前端
                 return R.ok("登陆成功").put("token", token).put("user", activeUser.getUser()).put("roles", activeUser.getRoles()).put("menu", menu);
-
             } catch (AuthenticationException e) {
                 e.printStackTrace();
-                return R.error(500, "用户名或密码错误或者您选择的登陆类型错误");
+                return R.error(500, "用户名或密码错误或者您选择的登陆类型错误或您的注册信息还未审核完成");
             }
         } else {
             return R.error(500, "验证码错误");

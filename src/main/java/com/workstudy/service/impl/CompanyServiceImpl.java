@@ -16,4 +16,9 @@ public class CompanyServiceImpl extends ServiceImpl<CompanyMapper, Company> impl
     public Company queryCompanyByUserName(String userName) {
         return baseMapper.queryCompanyByUserName(userName);
     }
+
+    @Override
+    public Company queryCompanyById(Integer id) {
+        return baseMapper.selectById(id);
+    }
 }

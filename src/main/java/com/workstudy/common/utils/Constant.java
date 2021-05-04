@@ -15,6 +15,8 @@ public class Constant {
     public static final String SELECT_FAIL="查询失败！";
     public static final String DELETE_SUCCESS="删除成功！";
     public static final String DELETE_FAIL="删除失败！";
+    public static final String OPERATION_SUCCESS="操作成功！";
+    public static final String OPERATION_FAIL="操作失败！";
 
     public static final Integer HASHITERATIONS=2;
 }

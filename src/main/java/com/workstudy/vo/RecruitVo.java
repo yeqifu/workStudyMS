@@ -6,11 +6,12 @@ import lombok.NoArgsConstructor;
 
 /**
  * @Author: 落亦-
- * @Date: 2021/5/2 15:20
+ * @Date: 2021/5/3 19:23
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TeacherVo extends BaseVo{
-    private String name;
+public class RecruitVo extends BaseVo {
+    private String content;
+    private String position;
 }

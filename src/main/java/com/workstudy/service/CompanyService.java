@@ -14,4 +14,11 @@ public interface CompanyService extends IService<Company> {
      * @return
      */
     Company queryCompanyByUserName(String userName);
+
+    /**
+     * 根据公司ID查询公司信息
+     * @param id
+     * @return
+     */
+    Company queryCompanyById(Integer id);
 }

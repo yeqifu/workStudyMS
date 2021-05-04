@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.workstudy.mapper.RecruitMapper">
+    <resultMap id="BaseResultMap" type="com.workstudy.entity.Recruit">
+        <!--@mbg.generated-->
+        <!--@Table recruit-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="company_id" jdbcType="INTEGER" property="companyId"/>
+        <result column="position" jdbcType="VARCHAR" property="position"/>
+        <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="content" jdbcType="VARCHAR" property="content"/>
+        <result column="work_time" jdbcType="VARCHAR" property="workTime"/>
+        <result column="salary" jdbcType="VARCHAR" property="salary"/>
+        <result column="contact" jdbcType="VARCHAR" property="contact"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="publish_time" jdbcType="TIMESTAMP" property="publishTime"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+    </resultMap>
+    <resultMap id="BaseResultMapTwo" type="com.workstudy.entity.Recruit">
+        <!--@mbg.generated-->
+        <!--@Table recruit-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="company_id" jdbcType="INTEGER" property="companyId"/>
+        <result column="position" jdbcType="VARCHAR" property="position"/>
+        <result column="address" jdbcType="VARCHAR" property="address"/>
+        <result column="content" jdbcType="VARCHAR" property="content"/>
+        <result column="work_time" jdbcType="VARCHAR" property="workTime"/>
+        <result column="salary" jdbcType="VARCHAR" property="salary"/>
+        <result column="contact" jdbcType="VARCHAR" property="contact"/>
+        <result column="phone" jdbcType="VARCHAR" property="phone"/>
+        <result column="publish_time" jdbcType="TIMESTAMP" property="publishTime"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <association property="company" javaType="com.workstudy.entity.Company" column="company_id" select="queryCompanyById">
+        </association>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, company_id, `position`, address, content, work_time, salary, contact, phone,
+        publish_time, `status`
+    </sql>
+
+    <select id="queryAllRecruitAndCompany" resultMap="BaseResultMapTwo">
+        select * from recruit ${ew.customSqlSegment}
+    </select>
+
+
+    <select id="queryCompanyById" resultType="com.workstudy.entity.Company">
+        select * from company where id = #{id,jdbcType=INTEGER};
+    </select>
+</mapper>

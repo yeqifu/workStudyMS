@@ -2,16 +2,16 @@ package com.workstudy.controller;
 
 import cn.hutool.core.date.DateUtil;
 import com.workstudy.common.utils.AppFileUtils;
+import com.workstudy.common.utils.R;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author: 落亦-
@@ -27,13 +27,15 @@ public class FileController {
      * @return
      */
     @RequestMapping("uploadFile")
-    public Map<String, Object> uploadFile(MultipartFile mf) {
+    @ResponseBody
+    public R uploadFile(MultipartFile mf) {
+        System.out.println(mf+"............");
         long size = mf.getSize();
         System.out.println(size + "==================");
         String contentType = mf.getContentType();
         System.out.println(contentType);
         //1.得到文件名
-        String oldName = mf.getOriginalFilename();
+        String oldName = UUID.randomUUID().toString();
         //3.得到当前日期的字符串
         String dirName = DateUtil.format(new Date(), "yyyy-MM-dd");
         //4.构造文件夹
@@ -50,10 +52,9 @@ public class FileController {
             mf.transferTo(file);
         } catch (IllegalStateException | IOException e) {
             e.printStackTrace();
+            return R.error("上传失败");
         }
-        Map<String, Object> map = new HashMap<String, Object>(16);
-        map.put("path", dirName + "/" + oldName);
-        return map;
+        return R.ok("上传成功").put("path",dirName + "/" + oldName);
     }
 
     /**

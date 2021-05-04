@@ -62,12 +62,12 @@ public class UserRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-        if (authenticationToken instanceof StudentToken){
+        if (authenticationToken instanceof StudentToken) {
             //获取学生的学号
             String studentNumber = authenticationToken.getPrincipal().toString();
             //根据学号去student表中查询出此学生
             Student student = studentService.queryStudentByStudentNumber(studentNumber);
-            if (null!=student){
+            if (null != student) {
                 ActiveUser activeUser = new ActiveUser();
                 activeUser.setUser(student);
 
@@ -78,12 +78,12 @@ public class UserRealm extends AuthorizingRealm {
                 SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(activeUser, student.getPassword(), ByteSource.Util.bytes(student.getSalt()), getName());
                 return info;
             }
-        }else if (authenticationToken instanceof TeacherToken){
+        } else if (authenticationToken instanceof TeacherToken) {
             //获取老师的工号
             String teacherNumber = authenticationToken.getPrincipal().toString();
             //根据老师工号去teacher表中查询出这个老师
             Teacher teacher = teacherService.queryTeacherByTeacherNumber(teacherNumber);
-            if (null!=teacher){
+            if (null != teacher) {
                 ActiveUser activeUser = new ActiveUser();
                 activeUser.setUser(teacher);
                 //根据用户ID查询出该用户的类型
@@ -93,12 +93,12 @@ public class UserRealm extends AuthorizingRealm {
                 SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(activeUser, teacher.getPassword(), ByteSource.Util.bytes(teacher.getSalt()), getName());
                 return info;
             }
-        }else if (authenticationToken instanceof CompanyToken){
+        } else if (authenticationToken instanceof CompanyToken) {
             //获取用户名
             String userName = authenticationToken.getPrincipal().toString();
             //根据用户名去company表中查询出此用户
             Company company = companyService.queryCompanyByUserName(userName);
-            if (null!=company){
+            if (null != company) {
                 ActiveUser activeUser = new ActiveUser();
                 activeUser.setUser(company);
                 //根据用户ID查询出该用户的类型
@@ -108,7 +108,7 @@ public class UserRealm extends AuthorizingRealm {
                 SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(activeUser, company.getPassword(), ByteSource.Util.bytes(company.getSalt()), getName());
                 return info;
             }
-        }else if(authenticationToken instanceof ManagerToken) {
+        } else if (authenticationToken instanceof ManagerToken) {
             //获取管理员的用户名
             String userName = authenticationToken.getPrincipal().toString();
             //根据用户名去manager表中查询出管理员
@@ -138,9 +138,6 @@ public class UserRealm extends AuthorizingRealm {
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
         ActiveUser activeUser = (ActiveUser) principalCollection.getPrimaryPrincipal();
         List<String> roles = activeUser.getRoles();
-        for (String role : roles) {
-            System.out.println(role+"........................");
-        }
         if (null != roles && roles.size() > 0) {
             //添加角色
             simpleAuthorizationInfo.addRoles(roles);

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.workstudy.mapper.ResumeMapper">
+  <resultMap id="BaseResultMap" type="com.workstudy.entity.Resume">
+    <!--@mbg.generated-->
+    <!--@Table resume-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="student_id" jdbcType="INTEGER" property="studentId" />
+    <result column="photo" jdbcType="VARCHAR" property="photo" />
+    <result column="skill" jdbcType="VARCHAR" property="skill" />
+    <result column="introduce" jdbcType="VARCHAR" property="introduce" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+    <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, student_id, photo, skill, introduce, remark, is_deleted
+  </sql>
+</mapper>

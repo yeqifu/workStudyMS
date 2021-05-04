@@ -1,9 +1,13 @@
 package com.workstudy.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.workstudy.common.realm.ActiveUser;
 import com.workstudy.common.utils.CRUDRUtils;
 import com.workstudy.common.utils.R;
 import com.workstudy.entity.Resume;
+import com.workstudy.entity.Student;
 import com.workstudy.service.ResumeService;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +32,12 @@ public class ResumeController {
      */
     @PostMapping("/resume")
     @RequiresRoles("student")
-    public R addResume(Resume resume) {
+    public R addResume(@RequestBody Resume resume) {
+        // 通过shiro获取学生信息
+        ActiveUser activeUser = (ActiveUser)SecurityUtils.getSubject().getPrincipal();
+        Student student = (Student) activeUser.getUser();
+        // 设置简历中学生的ID
+        resume.setStudentId(student.getId());
         boolean save = resumeService.save(resume);
         return CRUDRUtils.addR(save);
     }
@@ -41,7 +50,9 @@ public class ResumeController {
     @GetMapping("/resume")
     @RequiresRoles("student")
     public R queryResumeAll() {
-        List<Resume> resumeList = resumeService.list();
+        ActiveUser activeUser = (ActiveUser)SecurityUtils.getSubject().getPrincipal();
+        Student student = (Student) activeUser.getUser();
+        List<Resume> resumeList = resumeService.queryResumeAll(student.getId());
         return R.ok("查询成功").put("resumeList", resumeList);
     }
 
@@ -64,7 +75,7 @@ public class ResumeController {
      */
     @PutMapping("/resume")
     @RequiresRoles("student")
-    public R updateResume(Resume resume) {
+    public R updateResume(@RequestBody Resume resume) {
         boolean flag = resumeService.updateById(resume);
         return CRUDRUtils.updateR(flag);
     }

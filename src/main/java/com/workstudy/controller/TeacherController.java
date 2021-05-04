@@ -2,6 +2,7 @@ package com.workstudy.controller;
 
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.workstudy.common.realm.ActiveUser;
 import com.workstudy.common.utils.CRUDRUtils;
 import com.workstudy.common.utils.Constant;
 import com.workstudy.common.utils.R;
@@ -42,7 +43,7 @@ public class TeacherController {
      * @return
      */
     @PostMapping("/register/teacher")
-    public R registerTeacher(Teacher teacher) {
+    public R registerTeacher(@RequestBody Teacher teacher) {
         // 生成32位的盐
         String salt = IdUtil.simpleUUID();
         teacher.setSalt(salt);
@@ -60,8 +61,8 @@ public class TeacherController {
     @GetMapping("/apply")
     @RequiresRoles("teacher")
     public R queryCheckApplyAll(){
-        String userName = SecurityUtils.getSubject().getPrincipal().toString();
-        Teacher teacher = teacherService.queryTeacherByTeacherNumber(userName);
+        ActiveUser activeUser = (ActiveUser)SecurityUtils.getSubject().getPrincipal();
+        Teacher teacher = (Teacher)activeUser.getUser();
         QueryWrapper<StudentApplyTeacher> queryWrapper = new QueryWrapper<StudentApplyTeacher>();
         queryWrapper.eq("teacher_number",teacher.getTeacherNumber());
         queryWrapper.eq("status",0);
@@ -75,7 +76,7 @@ public class TeacherController {
             map.put("applyTime",studentApplyTeacher.getApplyDate());
             list.add(map);
         }
-        return R.ok("查询成功").put("applyTeacherList",applyTeacherList);
+        return R.ok("查询成功").put("data",applyTeacherList);
     }
 
     /**
@@ -96,7 +97,7 @@ public class TeacherController {
             studentApplyTeacher.setStatus((byte) 2);
             studentApplyTeacher.setReason(reason);
         }
-        studentApplyTeacher.setApplyDate(new Date());
+        studentApplyTeacher.setReplyDate(new Date());
         boolean flag = studentApplyTeacherService.updateById(studentApplyTeacher);
         if (flag == true){
             return R.ok("审核成功");
@@ -113,7 +114,7 @@ public class TeacherController {
     @GetMapping("/teacher/{id}")
     public R queryTeacherById(@PathVariable("id") Integer id){
         Teacher teacher = teacherService.getById(id);
-        return R.ok("查询成功").put("teacher",teacher);
+        return R.ok("查询成功").put("data",teacher);
     }
 
     /**
@@ -122,7 +123,14 @@ public class TeacherController {
      * @return
      */
     @PutMapping("/teacher")
-    public R updateTeacher(Teacher teacher){
+    public R updateTeacher(@RequestBody Teacher teacher){
+        Teacher teacherDataBase = teacherService.getById(teacher.getId());
+
+        String newPassword = teacher.getPassword();
+        if (null!=newPassword){
+            String newPasswordEncryption = new Md5Hash(newPassword,teacherDataBase.getSalt(),Constant.HASHITERATIONS).toString();
+            teacher.setPassword(newPasswordEncryption);
+        }
         boolean flag = teacherService.updateById(teacher);
         return CRUDRUtils.updateR(flag);
     }

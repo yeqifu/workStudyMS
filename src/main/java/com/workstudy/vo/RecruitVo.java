@@ -12,6 +12,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RecruitVo extends BaseVo {
-    private String content;
-    private String position;
+    private String condition;
 }

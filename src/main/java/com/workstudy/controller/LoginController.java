@@ -2,6 +2,7 @@ package com.workstudy.controller;
 
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
+import com.workstudy.common.UnCheckException;
 import com.workstudy.common.realm.ActiveUser;
 import com.workstudy.common.shiro.CompanyToken;
 import com.workstudy.common.shiro.ManagerToken;
@@ -72,6 +73,7 @@ public class LoginController {
                 menuTreeNodes.add(new MenuTreeNode(3, 0, 1, "求职管理", null));
                 menuTreeNodes.add(new MenuTreeNode(4, 3, 2, "个人简历", "/resume"));
                 menuTreeNodes.add(new MenuTreeNode(5, 3, 2, "查看岗位", "/recruit"));
+                menuTreeNodes.add(new MenuTreeNode(11, 3, 2, "我的收藏", "/collection"));
                 menuTreeNodes.add(new MenuTreeNode(6, 0, 1, "岗位申请", null));
                 menuTreeNodes.add(new MenuTreeNode(7, 6, 2, "岗位申请管理", "/applyRecruit"));
                 menuTreeNodes.add(new MenuTreeNode(8, 0, 2, "合同备案", null));
@@ -106,9 +108,13 @@ public class LoginController {
                 menuTreeNodes.add(new MenuTreeNode(1, 0, 1, "注册审核管理", null));
                 menuTreeNodes.add(new MenuTreeNode(2, 1, 2, "学生注册审核管理", "/studentRegister"));
                 menuTreeNodes.add(new MenuTreeNode(3, 1, 2, "老师注册审核管理", "/teacherRegister"));
-                menuTreeNodes.add(new MenuTreeNode(4, 3, 2, "公司注册审核管理", "/schoolRegister"));
+                menuTreeNodes.add(new MenuTreeNode(4, 1, 2, "公司注册审核管理", "/companyRegister"));
                 menuTreeNodes.add(new MenuTreeNode(5, 0, 1, "评价管理", null));
-                menuTreeNodes.add(new MenuTreeNode(6, 5, 2, "统计管理", "/contractRecord"));
+                menuTreeNodes.add(new MenuTreeNode(6, 5, 2, "学生评价公司管理", "/commentCompany"));
+                menuTreeNodes.add(new MenuTreeNode(7, 5, 2, "公司评价学生管理", "/commentStudent"));
+                menuTreeNodes.add(new MenuTreeNode(8, 0, 1, "统计管理", null));
+                menuTreeNodes.add(new MenuTreeNode(9, 8, 2, "暂定", "/contractRecord"));
+                menuTreeNodes.add(new MenuTreeNode(10, 8, 2, "暂定", "/contractRecord"));
                 menu = MenuTreeNode.build(menuTreeNodes, 0);
             }
             try {
@@ -119,7 +125,11 @@ public class LoginController {
                 return R.ok("登陆成功").put("token", token).put("user", activeUser.getUser()).put("roles", activeUser.getRoles()).put("menu", menu);
             } catch (AuthenticationException e) {
                 e.printStackTrace();
-                return R.error(500, "用户名或密码错误或者您选择的登陆类型错误或您的注册信息还未审核完成");
+                if (e instanceof UnCheckException){
+                    return R.error(500,e.getMessage());
+                }else {
+                    return R.error(500, "用户名或密码错误");
+                }
             }
         } else {
             return R.error(500, "验证码错误");

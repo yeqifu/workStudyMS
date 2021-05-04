@@ -1,23 +1,27 @@
 package com.workstudy.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.workstudy.common.utils.CRUDRUtils;
+import com.workstudy.common.utils.Constant;
 import com.workstudy.common.utils.R;
 import com.workstudy.entity.Company;
+import com.workstudy.entity.Manager;
 import com.workstudy.entity.Student;
 import com.workstudy.entity.Teacher;
 import com.workstudy.service.CompanyService;
+import com.workstudy.service.ManagerService;
 import com.workstudy.service.StudentService;
 import com.workstudy.service.TeacherService;
+import com.workstudy.vo.CompanyVo;
+import com.workstudy.vo.StudentVo;
+import com.workstudy.vo.TeacherVo;
 import org.apache.shiro.authz.annotation.RequiresRoles;
+import org.apache.shiro.crypto.hash.Md5Hash;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 /**
  * @Author: 刘其悦
@@ -28,95 +32,263 @@ public class RegisterCheckController {
 
     @Autowired
     private StudentService studentService;
-    
+
     @Autowired
     private TeacherService teacherService;
 
     @Autowired
     private CompanyService companyService;
-    
+
+    @Autowired
+    private ManagerService managerService;
+
     /**
      * 查询所有还未审核的学生注册信息
+     *
      * @return
      */
     @GetMapping("/unCheckStudent")
     @RequiresRoles("manager")
-    public R queryAllUnCheckStudent(){
+    public R queryAllUnCheckStudent(StudentVo studentVo) {
         QueryWrapper<Student> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("status","0");
-        List<Student> studentList = studentService.list(queryWrapper);
-        return R.ok("查询成功").put("studentList",studentList);
+        if (!StringUtils.isEmpty(studentVo.getCondition())) {
+            queryWrapper.like("name", studentVo.getCondition()).or().like("college", studentVo.getCondition());
+        }
+        // 查询状态为审核中的学生
+        queryWrapper.eq("status", "0");
+        Page<Student> page = new Page<>(studentVo.getCurrentPage(), studentVo.getPageSize());
+        Page<Student> studentPage = studentService.page(page, queryWrapper);
+        return R.ok("查询成功").put("data", studentPage);
     }
 
     /**
-     * 对学生的注册信息进行审核
-     * @param id    学生信息ID
+     * 查询所有审核通过的学生注册信息
+     *
      * @return
      */
-    @PostMapping("/checkStudent/{id}")
+    @GetMapping("/checkStudent")
     @RequiresRoles("manager")
-    public R checkStudentRegister(@PathVariable Integer id){
-        Student student = new Student();
-        student.setId(id);
-        student.setStatus((byte) 1);
-        boolean flag = studentService.updateById(student);
-        return CRUDRUtils.updateR(flag);
+    public R queryAllCheckStudent(StudentVo studentVo) {
+        QueryWrapper<Student> queryWrapper = new QueryWrapper<>();
+        if (!StringUtils.isEmpty(studentVo.getCondition())) {
+            queryWrapper.like("name", studentVo.getCondition()).or().like("college", studentVo.getCondition());
+        }
+        // 查询状态为审核中的学生
+        queryWrapper.eq("status", "1");
+        Page<Student> page = new Page<>(studentVo.getCurrentPage(), studentVo.getPageSize());
+        Page<Student> studentPage = studentService.page(page, queryWrapper);
+        return R.ok("查询成功").put("data", studentPage);
+    }
+
+    /**
+     * 对学生的注册信息进行审核----通过
+     *
+     * @param ids 学生信息ID
+     * @return
+     */
+    @PostMapping("/checkStudent")
+    @RequiresRoles("manager")
+    public R checkStudentRegister(int[] ids) {
+        boolean flag = false;
+        for (Integer id : ids) {
+            Student student = new Student();
+            student.setId(id);
+            // 设置状态为已通过
+            student.setStatus((byte) 1);
+            flag = studentService.updateById(student);
+        }
+        if (flag == true) {
+            return R.ok("审核成功！");
+        } else {
+            return R.error("审核失败！");
+        }
+    }
+
+    /**
+     * 对学生的注册信息进行审核----不通过
+     *
+     * @param id 学生信息ID
+     * @return
+     */
+    @DeleteMapping("/unCheckStudent/{id}")
+    public R unCheckStudentRegister(@PathVariable("id") Integer id) {
+        boolean flag = studentService.removeById(id);
+        if (flag == true) {
+            return R.ok("审核不通过成功！");
+        } else {
+            return R.error("审核不通过失败！");
+        }
     }
 
     /**
      * 查询所有还未审核的老师注册信息
+     *
      * @return
      */
     @GetMapping("/unCheckTeacher")
     @RequiresRoles("manager")
-    public R queryAllUnCheckTeacher(){
+    public R queryAllUnCheckTeacher(TeacherVo teacherVo) {
         QueryWrapper<Teacher> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("status","0");
-        List<Teacher> teacherList = teacherService.list(queryWrapper);
-        return R.ok("查询成功").put("teacherList",teacherList);
+        if (!StringUtils.isEmpty(teacherVo.getCondition())) {
+            queryWrapper.like("name", teacherVo.getCondition()).or().like("college", teacherVo.getCondition());
+        }
+        // 查询状态为审核中的老师
+        queryWrapper.eq("status", "0");
+        Page<Teacher> page = new Page<>(teacherVo.getCurrentPage(), teacherVo.getPageSize());
+        Page<Teacher> teacherList = teacherService.page(page, queryWrapper);
+        return R.ok("查询成功").put("data", teacherList);
     }
 
     /**
-     * 对老师的注册信息进行审核
-     * @param id    老师信息ID
+     * 查询所有审核通过的老师注册信息
+     *
      * @return
      */
-    @PostMapping("/checkTeacher/{id}")
+    @GetMapping("/checkTeacher")
     @RequiresRoles("manager")
-    public R checkTeacherRegister(@PathVariable Integer id){
-        Teacher teacher = new Teacher();
-        teacher.setId(id);
-        teacher.setStatus((byte) 1);
-        boolean flag = teacherService.updateById(teacher);
-        return CRUDRUtils.updateR(flag);
+    public R queryAllCheckTeacher(TeacherVo teacherVo) {
+        QueryWrapper<Teacher> queryWrapper = new QueryWrapper<>();
+        if (!StringUtils.isEmpty(teacherVo.getCondition())) {
+            queryWrapper.like("name", teacherVo.getCondition()).or().like("college", teacherVo.getCondition());
+        }
+        // 查询状态为审核中的老师
+        queryWrapper.eq("status", "1");
+        Page<Teacher> page = new Page<>(teacherVo.getCurrentPage(), teacherVo.getPageSize());
+        Page<Teacher> teacherList = teacherService.page(page, queryWrapper);
+        return R.ok("查询成功").put("data", teacherList);
+    }
+
+    /**
+     * 对老师的注册信息进行审核----通过
+     *
+     * @param ids 老师信息ID
+     * @return
+     */
+    @PostMapping("/checkTeacher")
+    @RequiresRoles("manager")
+    public R checkTeacherRegister(int[] ids) {
+        boolean flag = false;
+        for (Integer id : ids) {
+            Teacher teacher = new Teacher();
+            teacher.setId(id);
+            teacher.setStatus((byte) 1);
+            flag = teacherService.updateById(teacher);
+        }
+        if (flag == true) {
+            return R.ok("审核成功！");
+        } else {
+            return R.error("审核失败！");
+        }
+    }
+
+    /**
+     * 对老师的注册信息进行审核----不通过
+     *
+     * @param id 老师信息ID
+     * @return
+     */
+    @DeleteMapping("/unCheckTeacher/{id}")
+    public R unCheckTeacherRegister(@PathVariable("id") Integer id) {
+        boolean flag = teacherService.removeById(id);
+        if (flag == true) {
+            return R.ok("审核不通过成功！");
+        } else {
+            return R.error("审核不通过失败！");
+        }
     }
 
     /**
      * 查询所有还未审核的公司注册信息
+     *
      * @return
      */
     @GetMapping("/unCheckCompany")
     @RequiresRoles("manager")
-    public R queryAllUnCheckCompany(){
+    public R queryAllUnCheckCompany(CompanyVo companyVo) {
         QueryWrapper<Company> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("status","0");
-        List<Company> companyList = companyService.list(queryWrapper);
-        return R.ok("查询成功").put("companyList",companyList);
+        if (!StringUtils.isEmpty(companyVo.getCondition())) {
+            queryWrapper.like("name", companyVo.getCondition()).or().like("address", companyVo.getCondition());
+        }
+        queryWrapper.eq("status", "0");
+        Page<Company> page = new Page<>(companyVo.getCurrentPage(), companyVo.getPageSize());
+        Page<Company> companyPage = companyService.page(page, queryWrapper);
+        return R.ok("查询成功").put("data", companyPage);
     }
 
     /**
-     * 对公司的注册信息进行审核
-     * @param id    公司信息ID
+     * 查询所有审核通过的公司注册信息
+     *
      * @return
      */
-    @PostMapping("/checkCompany/{id}")
+    @GetMapping("/checkCompany")
     @RequiresRoles("manager")
-    public R checkCompanyRegister(@PathVariable Integer id){
-        Company company = new Company();
-        company.setId(id);
-        company.setStatus((byte) 1);
-        boolean flag = companyService.updateById(company);
-        return CRUDRUtils.updateR(flag);
+    public R queryAllCheckCompany(CompanyVo companyVo) {
+        QueryWrapper<Company> queryWrapper = new QueryWrapper<>();
+        if (!StringUtils.isEmpty(companyVo.getCondition())) {
+            queryWrapper.like("name", companyVo.getCondition()).or().like("address", companyVo.getCondition());
+        }
+        queryWrapper.eq("status", "1");
+        Page<Company> page = new Page<>(companyVo.getCurrentPage(), companyVo.getPageSize());
+        Page<Company> companyPage = companyService.page(page, queryWrapper);
+        return R.ok("查询成功").put("data", companyPage);
     }
 
+    /**
+     * 对公司的注册信息进行审核----通过
+     *
+     * @param ids 公司信息ID
+     * @return
+     */
+    @PostMapping("/checkCompany")
+    @RequiresRoles("manager")
+    public R checkCompanyRegister(int[] ids) {
+        boolean flag = false;
+        for (Integer id : ids) {
+            Company company = new Company();
+            company.setId(id);
+            company.setStatus((byte) 1);
+            flag = companyService.updateById(company);
+        }
+        if (flag == true) {
+            return R.ok("审核通过成功！");
+        } else {
+            return R.error("审核通过失败！");
+        }
+    }
+
+    /**
+     * 对公司的注册信息进行审核----不通过
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/unCheckCompany/{id}")
+    public R unCheckCompanyRegister(@PathVariable("id") Integer id){
+        boolean flag = companyService.removeById(id);
+        if (flag == true) {
+            return R.ok("审核不通过成功！");
+        } else {
+            return R.error("审核不通过失败！");
+        }
+    }
+
+    /**
+     * 修改管理员
+     *
+     * @param manager
+     * @return
+     */
+    @PutMapping("/manager")
+    @RequiresRoles("manager")
+    public R updateManager(@RequestBody Manager manager) {
+        Manager managerDataBase = managerService.getById(manager.getId());
+
+        String newPassword = manager.getPassword();
+        if (null!=newPassword){
+            String newPasswordEncryption = new Md5Hash(newPassword,managerDataBase.getSalt(), Constant.HASHITERATIONS).toString();
+            manager.setPassword(newPasswordEncryption);
+        }
+        boolean flag = managerService.updateById(manager);
+        return CRUDRUtils.updateR(flag);
+    }
+    
 }

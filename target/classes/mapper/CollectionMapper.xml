@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.workstudy.mapper.CollectionMapper">
+    <resultMap id="BaseResultMap" type="com.workstudy.entity.Collection">
+        <!--@mbg.generated-->
+        <!--@Table collection-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="student_id" jdbcType="INTEGER" property="studentId"/>
+        <result column="recruit_id" jdbcType="INTEGER" property="recruitId"/>
+        <result column="time" jdbcType="TIMESTAMP" property="time"/>
+    </resultMap>
+    <resultMap id="BaseResultMapTwo" type="com.workstudy.entity.Collection">
+        <!--@mbg.generated-->
+        <!--@Table collection-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="student_id" jdbcType="INTEGER" property="studentId"/>
+        <result column="recruit_id" jdbcType="INTEGER" property="recruitId"/>
+        <result column="time" jdbcType="TIMESTAMP" property="time"/>
+        <association property="recruit" javaType="com.workstudy.entity.Recruit" column="recruit_id" select="com.workstudy.mapper.RecruitMapper.queryRecruitById">
+
+        </association>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, student_id, recruit_id, `time`
+    </sql>
+    <!--查询所有学生收藏的招聘信息-->
+    <select id="queryCollectionAndRecruit" resultMap="BaseResultMapTwo">
+        select * from collection
+        left join recruit on recruit.id = collection.recruit_id
+        <where>
+            <if test="condition != null and condition != ''">
+                 recruit.position like concat('%',#{condition,jdbcType=VARCHAR},'%') or
+            </if>
+            <if test="condition != null and condition != ''">
+                recruit.content like concat('%',#{condition,jdbcType=VARCHAR},'%')
+            </if>
+        </where>
+    </select>
+</mapper>

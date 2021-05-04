@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -51,6 +53,7 @@ public class StudentApplyTeacher implements Serializable {
      * 申请时间
      */
     @TableField(value = "apply_date")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date applyDate;
 
     /**
@@ -58,4 +61,7 @@ public class StudentApplyTeacher implements Serializable {
      */
     @TableField(value = "reply_date")
     private Date replyDate;
+
+    @TableField(exist = false)
+    private Teacher teacher;
 }

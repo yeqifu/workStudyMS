@@ -1,5 +1,6 @@
 package com.workstudy.common.realm;
 
+import com.workstudy.common.UnCheckException;
 import com.workstudy.common.shiro.CompanyToken;
 import com.workstudy.common.shiro.ManagerToken;
 import com.workstudy.common.shiro.StudentToken;
@@ -77,6 +78,8 @@ public class UserRealm extends AuthorizingRealm {
                 activeUser.setRoles(roleList);
                 SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(activeUser, student.getPassword(), ByteSource.Util.bytes(student.getSalt()), getName());
                 return info;
+            }else {
+                throw new UnCheckException("您选择的登陆类型错误或您的注册信息还未审核完成");
             }
         } else if (authenticationToken instanceof TeacherToken) {
             //获取老师的工号
@@ -92,6 +95,8 @@ public class UserRealm extends AuthorizingRealm {
                 activeUser.setRoles(roleList);
                 SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(activeUser, teacher.getPassword(), ByteSource.Util.bytes(teacher.getSalt()), getName());
                 return info;
+            }else {
+                throw new UnCheckException("您选择的登陆类型错误或您的注册信息还未审核完成");
             }
         } else if (authenticationToken instanceof CompanyToken) {
             //获取用户名
@@ -107,6 +112,8 @@ public class UserRealm extends AuthorizingRealm {
                 activeUser.setRoles(roleList);
                 SimpleAuthenticationInfo info = new SimpleAuthenticationInfo(activeUser, company.getPassword(), ByteSource.Util.bytes(company.getSalt()), getName());
                 return info;
+            }else {
+                throw new UnCheckException("您选择的登陆类型错误或您的注册信息还未审核完成");
             }
         } else if (authenticationToken instanceof ManagerToken) {
             //获取管理员的用户名

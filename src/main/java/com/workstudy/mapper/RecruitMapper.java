@@ -35,4 +35,11 @@ public interface RecruitMapper extends BaseMapper<Recruit> {
      * @return
      */
     Page<Recruit> queryAllRecruitAndCompany(Page<Recruit> page, @Param(Constants.WRAPPER)Wrapper<Recruit> queryWrapper);
+
+    /**
+     * 根据招聘信息ID查询招聘信息
+     * @param id    招聘信息ID
+     * @return
+     */
+    Recruit queryRecruitById(Integer id);
 }

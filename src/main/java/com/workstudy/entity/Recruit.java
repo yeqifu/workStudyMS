@@ -84,5 +84,6 @@ public class Recruit {
     /**
      * 公司
      */
+    @TableField(exist = false)
     private Company company;
 }

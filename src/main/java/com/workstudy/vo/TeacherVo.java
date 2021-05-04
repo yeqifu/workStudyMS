@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TeacherVo extends BaseVo{
-    private String name;
+    private String condition;
 }

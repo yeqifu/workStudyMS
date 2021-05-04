@@ -55,4 +55,7 @@ public class Resume implements Serializable {
     @TableLogic
     @TableField(value = "is_deleted")
     private Byte isDeleted;
+
+    @TableField(exist = false)
+    private Student student;
 }

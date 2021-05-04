@@ -2,12 +2,15 @@ package com.workstudy.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.workstudy.common.realm.ActiveUser;
 import com.workstudy.common.utils.CRUDRUtils;
 import com.workstudy.common.utils.R;
+import com.workstudy.entity.Company;
 import com.workstudy.entity.Recruit;
 import com.workstudy.mapper.RecruitMapper;
 import com.workstudy.service.RecruitService;
 import com.workstudy.vo.RecruitVo;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
@@ -36,7 +39,12 @@ public class RecruitController {
      */
     @PostMapping("/recruit")
     @RequiresRoles("company")
-    public R publishRecruit(Recruit recruit) {
+    public R publishRecruit(@RequestBody Recruit recruit) {
+        // 通过shiro获取公司信息
+        ActiveUser activeUser = (ActiveUser)SecurityUtils.getSubject().getPrincipal();
+        Company company = (Company)activeUser.getUser();
+        // 设置公司ID
+        recruit.setCompanyId(company.getId());
         recruit.setPublishTime(new Date());
         boolean save = recruitService.save(recruit);
         return CRUDRUtils.addR(save);
@@ -48,13 +56,17 @@ public class RecruitController {
      * @param recruitVo
      * @return
      */
-    @GetMapping("/recruit/company/{id}")
-    public R queryRecruitByCompany(RecruitVo recruitVo, @PathVariable("id") Integer id) {
+    @GetMapping("/recruit/company")
+    public R queryRecruitByCompany(RecruitVo recruitVo) {
+        // 通过shiro获取公司信息
+        ActiveUser activeUser = (ActiveUser)SecurityUtils.getSubject().getPrincipal();
+        Company company = (Company)activeUser.getUser();
+        // 设置查询条件
         QueryWrapper<Recruit> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("company_id", id);
+        queryWrapper.eq("company_id", company.getId());
         Page<Recruit> page = new Page<>(recruitVo.getCurrentPage(), recruitVo.getPageSize());
         Page<Recruit> recruitPage = recruitService.page(page, queryWrapper);
-        return R.ok("查询成功").put("recruitPage", recruitPage);
+        return R.ok("查询成功").put("data", recruitPage);
     }
 
     /**
@@ -67,18 +79,14 @@ public class RecruitController {
     @RequiresRoles("student")
     public R queryAllRecruit(RecruitVo recruitVo) {
         QueryWrapper<Recruit> queryWrapper = new QueryWrapper<>();
-        if (!StringUtils.isEmpty(recruitVo.getPosition())) {
-            queryWrapper.like("position", recruitVo.getPosition());
-        }
-        if (!StringUtils.isEmpty(recruitVo.getContent())) {
-            queryWrapper.like("content", recruitVo.getContent());
+        if (!StringUtils.isEmpty(recruitVo.getCondition())) {
+            queryWrapper.like("position", recruitVo.getCondition()).or().like("content",recruitVo .getCondition());
         }
         // 查询status为0，即招聘中的招聘信息
         queryWrapper.eq("status", 0);
         Page<Recruit> page = new Page<>(recruitVo.getCurrentPage(), recruitVo.getPageSize());
         Page<Recruit> recruitPage = recruitMapper.queryAllRecruitAndCompany(page, queryWrapper);
-
-        return R.ok("查询成功").put("recruitPage", recruitPage);
+        return R.ok("查询成功").put("data", recruitPage);
     }
 
     /**
@@ -90,7 +98,7 @@ public class RecruitController {
     @GetMapping("/recruit/{id}")
     public R queryRecruitById(@PathVariable("id") Integer id) {
         Recruit recruit = recruitService.getById(id);
-        return R.ok("查询成功").put("recruit", recruit);
+        return R.ok("查询成功").put("data", recruit);
     }
 
     /**
@@ -101,7 +109,7 @@ public class RecruitController {
      */
     @PutMapping("/recruit")
     @RequiresRoles("company")
-    public R updateRecruit(Recruit recruit) {
+    public R updateRecruit(@RequestBody Recruit recruit) {
         boolean flag = recruitService.updateById(recruit);
         return CRUDRUtils.updateR(flag);
     }

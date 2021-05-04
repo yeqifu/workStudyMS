@@ -5,6 +5,7 @@ import com.workstudy.common.utils.CRUDRUtils;
 import com.workstudy.common.utils.Constant;
 import com.workstudy.common.utils.R;
 import com.workstudy.entity.Company;
+import com.workstudy.entity.Student;
 import com.workstudy.service.CompanyService;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.crypto.hash.Md5Hash;
@@ -27,7 +28,7 @@ public class CompanyController {
      * @return
      */
     @PostMapping("/register/company")
-    public R registerCompany(Company company){
+    public R registerCompany(@RequestBody Company company){
         // 生成32位的盐
         String salt = IdUtil.simpleUUID();
         company.setSalt(salt);
@@ -46,7 +47,7 @@ public class CompanyController {
     @GetMapping("/company/{id}")
     public R queryCompanyById(@PathVariable("id") Integer id){
         Company company = companyService.getById(id);
-        return R.ok("查询成功").put("company",company);
+        return R.ok("查询成功").put("data",company);
     }
 
     /**
@@ -56,7 +57,14 @@ public class CompanyController {
      */
     @PutMapping("/company")
     @RequiresRoles("company")
-    public R updateCompany(Company company){
+    public R updateCompany(@RequestBody Company company){
+        Company companyDataBase = companyService.getById(company.getId());
+
+        String newPassword = company.getPassword();
+        if (null!=newPassword){
+            String newPasswordEncryption = new Md5Hash(newPassword,companyDataBase.getSalt(),Constant.HASHITERATIONS).toString();
+            company.setPassword(newPasswordEncryption);
+        }
         boolean flag = companyService.updateById(company);
         return CRUDRUtils.updateR(flag);
     }

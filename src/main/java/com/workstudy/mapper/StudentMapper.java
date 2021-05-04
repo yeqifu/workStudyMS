@@ -15,4 +15,11 @@ public interface StudentMapper extends BaseMapper<Student> {
      * @return
      */
     Student queryStudentByStudentNumber(String studentNumber);
+
+    /**
+     * 根据学生ID查询学生信息
+     * @param id    学生ID
+     * @return
+     */
+    Student queryStudentById(Integer id);
 }

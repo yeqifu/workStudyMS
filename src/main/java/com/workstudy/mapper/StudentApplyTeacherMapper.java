@@ -19,4 +19,19 @@ public interface StudentApplyTeacherMapper extends BaseMapper<StudentApplyTeache
      */
     Page<StudentApplyTeacher> queryMyApplyAll(Page<StudentApplyTeacher> page,@Param("studentNumber") String studentNumber);
 
+    /**
+     * 查询所有审核中的申请
+     * @param page
+     * @param teacherNumber
+     * @return
+     */
+    Page<StudentApplyTeacher> queryMyCheckAll(Page<StudentApplyTeacher> page,@Param("teacherNumber") String teacherNumber,@Param("status")Integer status);
+
+    /**
+     * 查询所有审核通过和未通过的申请
+     * @param page
+     * @param teacherNumber
+     * @return
+     */
+    Page<StudentApplyTeacher> queryMyCheckSuccessOrFailAll(Page<StudentApplyTeacher> page,@Param("teacherNumber") String teacherNumber);
 }

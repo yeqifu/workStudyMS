@@ -100,7 +100,7 @@ public class StudentController {
         ActiveUser activeUser = (ActiveUser)SecurityUtils.getSubject().getPrincipal();
         Student student = (Student)activeUser.getUser();
         Boolean aBoolean = queryHasApply(student);
-        if (aBoolean == false ){
+        if (aBoolean == true ){
             return R.error("您已经提交了申请指导老师的请求，等待老师审核中，请勿重复提交申请");
         }else {
             StudentApplyTeacher studentApplyTeacher = new StudentApplyTeacher();
@@ -123,7 +123,7 @@ public class StudentController {
 
     /**
      * 查询该学生是否已经提交了指导老师的审核
-     * @return
+     * @return  true--已经提交了指导老师的申请   false--未提交指导老师的申请
      */
     public Boolean queryHasApply(Student student){
         QueryWrapper<StudentApplyTeacher> queryWrapper = new QueryWrapper<>();
@@ -131,9 +131,9 @@ public class StudentController {
         queryWrapper.eq("status",0);
         StudentApplyTeacher studentApplyTeacher = studentApplyTeacherService.getOne(queryWrapper);
         if (null!=studentApplyTeacher){
-            return false;
-        }else {
             return true;
+        }else {
+            return false;
         }
     }
 
@@ -149,12 +149,13 @@ public class StudentController {
         QueryWrapper<StudentApplyTeacher> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("student_number",student.getStudentNumber());
         queryWrapper.eq("status",1);
+        Boolean aBoolean = queryHasApply(student);
         StudentApplyTeacher studentApplyTeacher = studentApplyTeacherService.getOne(queryWrapper);
         if (studentApplyTeacher!=null){
             Teacher teacher = teacherService.queryTeacherByTeacherNumber(studentApplyTeacher.getTeacherNumber());
-            return R.ok("查询成功").put("data",teacher);
+            return R.ok("查询成功").put("data",teacher).put("applyId",studentApplyTeacher.getId()).put("isApplying",false);
         }else {
-            return R.ok("查询成功").put("data",null);
+            return R.ok("查询成功").put("data",null).put("isApplying",aBoolean);
         }
     }
 

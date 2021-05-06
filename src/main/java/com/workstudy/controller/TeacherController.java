@@ -2,6 +2,7 @@ package com.workstudy.controller;
 
 import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.workstudy.common.realm.ActiveUser;
 import com.workstudy.common.utils.CRUDRUtils;
 import com.workstudy.common.utils.Constant;
@@ -9,9 +10,11 @@ import com.workstudy.common.utils.R;
 import com.workstudy.entity.Student;
 import com.workstudy.entity.StudentApplyTeacher;
 import com.workstudy.entity.Teacher;
+import com.workstudy.mapper.StudentApplyTeacherMapper;
 import com.workstudy.service.StudentApplyTeacherService;
 import com.workstudy.service.StudentService;
 import com.workstudy.service.TeacherService;
+import com.workstudy.vo.StudentApplyTeacherVo;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.crypto.hash.Md5Hash;
@@ -36,6 +39,9 @@ public class TeacherController {
     @Autowired
     private StudentService studentService;
 
+    @Autowired
+    private StudentApplyTeacherMapper studentApplyTeacherMapper;
+
     /**
      * 老师注册
      *
@@ -55,29 +61,33 @@ public class TeacherController {
     }
 
     /**
-     * 查询所有选择该老师的申请
+     * 查询所有选择该老师的申请---审核中的申请
      * @return
      */
     @GetMapping("/apply")
     @RequiresRoles("teacher")
-    public R queryCheckApplyAll(){
+    public R queryCheckApplyAll(StudentApplyTeacherVo studentApplyTeacherVo){
         ActiveUser activeUser = (ActiveUser)SecurityUtils.getSubject().getPrincipal();
         Teacher teacher = (Teacher)activeUser.getUser();
-        QueryWrapper<StudentApplyTeacher> queryWrapper = new QueryWrapper<StudentApplyTeacher>();
-        queryWrapper.eq("teacher_number",teacher.getTeacherNumber());
-        queryWrapper.eq("status",0);
-        List<StudentApplyTeacher> applyTeacherList = studentApplyTeacherService.list(queryWrapper);
-        List<Object> list = new ArrayList<>(16);
-        for (StudentApplyTeacher studentApplyTeacher : applyTeacherList) {
-            String studentNumber = studentApplyTeacher.getStudentNumber();
-            Student student = studentService.queryStudentByStudentNumber(studentNumber);
-            Map<Object,Object> map = new HashMap<>(16);
-            map.put("student",student);
-            map.put("applyTime",studentApplyTeacher.getApplyDate());
-            list.add(map);
-        }
-        return R.ok("查询成功").put("data",applyTeacherList);
+        Page<StudentApplyTeacher> page = new Page<>(studentApplyTeacherVo.getCurrentPage(),studentApplyTeacherVo.getPageSize());
+        Page<StudentApplyTeacher> studentApplyTeacherPage = studentApplyTeacherMapper.queryMyCheckAll(page, teacher.getTeacherNumber(), 0);
+        return R.ok("查询成功").put("data",studentApplyTeacherPage);
     }
+
+    /**
+     * 查询所有选择该老师的申请---审核通过和未通过的申请
+     * @return
+     */
+    @GetMapping("/applySuccessOrFail")
+    @RequiresRoles("teacher")
+    public R queryCheckApplySuccessOrFailAll(StudentApplyTeacherVo studentApplyTeacherVo){
+        ActiveUser activeUser = (ActiveUser)SecurityUtils.getSubject().getPrincipal();
+        Teacher teacher = (Teacher)activeUser.getUser();
+        Page<StudentApplyTeacher> page = new Page<>(studentApplyTeacherVo.getCurrentPage(),studentApplyTeacherVo.getPageSize());
+        Page<StudentApplyTeacher> studentApplyTeacherPage = studentApplyTeacherMapper.queryMyCheckSuccessOrFailAll(page, teacher.getTeacherNumber());
+        return R.ok("查询成功").put("data",studentApplyTeacherPage);
+    }
+
 
     /**
      * 老师审核学生申请
@@ -91,9 +101,9 @@ public class TeacherController {
     public R checkApply(@PathVariable("id") Integer id,@PathVariable("type") Integer type,@RequestParam(value = "reason",required = false) String reason){
         StudentApplyTeacher studentApplyTeacher = new StudentApplyTeacher();
         studentApplyTeacher.setId(id);
-        if (type == 0){
+        if (type == 1){
             studentApplyTeacher.setStatus((byte) 1);
-        }else if (type == 1){
+        }else if (type == 2){
             studentApplyTeacher.setStatus((byte) 2);
             studentApplyTeacher.setReason(reason);
         }
@@ -125,7 +135,6 @@ public class TeacherController {
     @PutMapping("/teacher")
     public R updateTeacher(@RequestBody Teacher teacher){
         Teacher teacherDataBase = teacherService.getById(teacher.getId());
-
         String newPassword = teacher.getPassword();
         if (null!=newPassword){
             String newPasswordEncryption = new Md5Hash(newPassword,teacherDataBase.getSalt(),Constant.HASHITERATIONS).toString();

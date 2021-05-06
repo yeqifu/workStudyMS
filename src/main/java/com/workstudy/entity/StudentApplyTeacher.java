@@ -60,8 +60,12 @@ public class StudentApplyTeacher implements Serializable {
      * 回复时间
      */
     @TableField(value = "reply_date")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date replyDate;
 
     @TableField(exist = false)
     private Teacher teacher;
+
+    @TableField(exist = false)
+    private Student student;
 }

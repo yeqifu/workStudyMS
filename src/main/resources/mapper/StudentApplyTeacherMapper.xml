@@ -25,6 +25,19 @@
         <association property="teacher" javaType="com.workstudy.entity.Teacher" column="teacher_number" select="com.workstudy.mapper.TeacherMapper.queryTeacherByTeacherNumber">
         </association>
     </resultMap>
+    <resultMap id="BaseResultMapThree" type="com.workstudy.entity.StudentApplyTeacher">
+        <!--@mbg.generated-->
+        <!--@Table student_apply_teacher-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="student_number" jdbcType="VARCHAR" property="studentNumber"/>
+        <result column="teacher_number" jdbcType="VARCHAR" property="teacherNumber"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="reason" jdbcType="VARCHAR" property="reason"/>
+        <result column="apply_date" jdbcType="TIMESTAMP" property="applyDate"/>
+        <result column="reply_date" jdbcType="TIMESTAMP" property="replyDate"/>
+        <association property="student" javaType="com.workstudy.entity.Student" column="student_number" select="com.workstudy.mapper.StudentMapper.queryStudentByStudentNumber">
+        </association>
+    </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
         id, student_number, teacher_number, `status`, reason, apply_date, reply_date
@@ -34,6 +47,18 @@
         select * from student_apply_teacher
         left join teacher on teacher.teacher_number = student_apply_teacher.teacher_number
         where student_apply_teacher.student_number = #{studentNumber,jdbcType=VARCHAR}
+        order by apply_date desc
+    </select>
+    <select id="queryMyCheckAll" resultMap="BaseResultMapThree">
+        select * from student_apply_teacher
+        left join student on student.student_number = student_apply_teacher.student_number
+        where student_apply_teacher.teacher_number = #{teacherNumber,jdbcType=VARCHAR} and student_apply_teacher.status=#{status,jdbcType=INTEGER}
+        order by apply_date desc
+    </select>
+    <select id="queryMyCheckSuccessOrFailAll" resultMap="BaseResultMapThree">
+        select * from student_apply_teacher
+        left join student on student.student_number = student_apply_teacher.student_number
+        where student_apply_teacher.teacher_number = #{teacherNumber,jdbcType=VARCHAR} and student_apply_teacher.status=1 or student_apply_teacher.status = 2
         order by apply_date desc
     </select>
 </mapper>

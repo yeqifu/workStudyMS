@@ -51,12 +51,13 @@ public class RecruitController {
     }
 
     /**
-     * 公司查询自己发布的招聘信息
+     * 公司查询自己发布的招聘信息--招聘中的信息
      *
      * @param recruitVo
      * @return
      */
     @GetMapping("/recruit/company")
+    @RequiresRoles("company")
     public R queryRecruitByCompany(RecruitVo recruitVo) {
         // 通过shiro获取公司信息
         ActiveUser activeUser = (ActiveUser)SecurityUtils.getSubject().getPrincipal();
@@ -64,6 +65,28 @@ public class RecruitController {
         // 设置查询条件
         QueryWrapper<Recruit> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("company_id", company.getId());
+        queryWrapper.eq("status",0);
+        Page<Recruit> page = new Page<>(recruitVo.getCurrentPage(), recruitVo.getPageSize());
+        Page<Recruit> recruitPage = recruitService.page(page, queryWrapper);
+        return R.ok("查询成功").put("data", recruitPage);
+    }
+
+    /**
+     * 公司查询自己发布的招聘信息--已结束的信息
+     *
+     * @param recruitVo
+     * @return
+     */
+    @GetMapping("/recruitOver/company")
+    @RequiresRoles("company")
+    public R queryRecruitOverByCompany(RecruitVo recruitVo) {
+        // 通过shiro获取公司信息
+        ActiveUser activeUser = (ActiveUser)SecurityUtils.getSubject().getPrincipal();
+        Company company = (Company)activeUser.getUser();
+        // 设置查询条件
+        QueryWrapper<Recruit> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("company_id", company.getId());
+        queryWrapper.eq("status",1);
         Page<Recruit> page = new Page<>(recruitVo.getCurrentPage(), recruitVo.getPageSize());
         Page<Recruit> recruitPage = recruitService.page(page, queryWrapper);
         return R.ok("查询成功").put("data", recruitPage);
@@ -118,19 +141,14 @@ public class RecruitController {
      * 修改招聘信息的状态
      *
      * @param id     招聘信息ID
-     * @param status 招聘信息状态  0-招聘中  1-已结束
      * @return
      */
-    @PutMapping("/recruit/{id}/{status}")
+    @PutMapping("/recruit/{id}")
     @RequiresRoles("company")
-    public R changeStatus(@PathVariable("id") Integer id, @PathVariable("status") Integer status) {
+    public R changeStatus(@PathVariable("id") Integer id) {
         Recruit recruit = new Recruit();
         recruit.setId(id);
-        if (status == 0) {
-            recruit.setStatus((byte) 1);
-        } else if (status == 1) {
-            recruit.setStatus((byte) 0);
-        }
+        recruit.setStatus((byte) 1);
         boolean flag = recruitService.updateById(recruit);
         return CRUDRUtils.updateR(flag);
     }

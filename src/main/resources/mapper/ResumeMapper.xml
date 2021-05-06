@@ -35,6 +35,6 @@
     <select id="queryResumeAll" resultMap="BaseResultMapTwo">
         select * from resume
         left join student on student.id = resume.student_id
-        where resume.student_id = #{studentId,jdbcType=INTEGER}
+        where resume.student_id = #{studentId,jdbcType=INTEGER} and is_deleted = 0
     </select>
 </mapper>

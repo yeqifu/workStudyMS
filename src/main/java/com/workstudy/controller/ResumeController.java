@@ -1,6 +1,5 @@
 package com.workstudy.controller;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.workstudy.common.realm.ActiveUser;
 import com.workstudy.common.utils.CRUDRUtils;
 import com.workstudy.common.utils.R;
@@ -53,7 +52,7 @@ public class ResumeController {
         ActiveUser activeUser = (ActiveUser)SecurityUtils.getSubject().getPrincipal();
         Student student = (Student) activeUser.getUser();
         List<Resume> resumeList = resumeService.queryResumeAll(student.getId());
-        return R.ok("查询成功").put("resumeList", resumeList);
+        return R.ok("查询成功").put("data", resumeList);
     }
 
     /**
@@ -62,6 +61,7 @@ public class ResumeController {
      * @return
      */
     @GetMapping("/resume/{id}")
+    @RequiresRoles("student")
     public R queryResumeById(@PathVariable("id") Integer id){
         Resume resume = resumeService.getById(id);
         return R.ok("查询成功").put("resume",resume);

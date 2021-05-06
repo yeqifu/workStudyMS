@@ -3,10 +3,12 @@ package com.workstudy.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.workstudy.common.realm.ActiveUser;
+import com.workstudy.common.shiro.ShiroUtils;
 import com.workstudy.common.utils.CRUDRUtils;
 import com.workstudy.common.utils.R;
 import com.workstudy.entity.Company;
 import com.workstudy.entity.Recruit;
+import com.workstudy.entity.Student;
 import com.workstudy.mapper.RecruitMapper;
 import com.workstudy.service.RecruitService;
 import com.workstudy.vo.RecruitVo;
@@ -41,8 +43,8 @@ public class RecruitController {
     @RequiresRoles("company")
     public R publishRecruit(@RequestBody Recruit recruit) {
         // 通过shiro获取公司信息
-        ActiveUser activeUser = (ActiveUser)SecurityUtils.getSubject().getPrincipal();
-        Company company = (Company)activeUser.getUser();
+        ActiveUser activeUser = (ActiveUser) SecurityUtils.getSubject().getPrincipal();
+        Company company = (Company) activeUser.getUser();
         // 设置公司ID
         recruit.setCompanyId(company.getId());
         recruit.setPublishTime(new Date());
@@ -60,12 +62,12 @@ public class RecruitController {
     @RequiresRoles("company")
     public R queryRecruitByCompany(RecruitVo recruitVo) {
         // 通过shiro获取公司信息
-        ActiveUser activeUser = (ActiveUser)SecurityUtils.getSubject().getPrincipal();
-        Company company = (Company)activeUser.getUser();
+        ActiveUser activeUser = (ActiveUser) SecurityUtils.getSubject().getPrincipal();
+        Company company = (Company) activeUser.getUser();
         // 设置查询条件
         QueryWrapper<Recruit> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("company_id", company.getId());
-        queryWrapper.eq("status",0);
+        queryWrapper.eq("status", 0);
         Page<Recruit> page = new Page<>(recruitVo.getCurrentPage(), recruitVo.getPageSize());
         Page<Recruit> recruitPage = recruitService.page(page, queryWrapper);
         return R.ok("查询成功").put("data", recruitPage);
@@ -81,12 +83,12 @@ public class RecruitController {
     @RequiresRoles("company")
     public R queryRecruitOverByCompany(RecruitVo recruitVo) {
         // 通过shiro获取公司信息
-        ActiveUser activeUser = (ActiveUser)SecurityUtils.getSubject().getPrincipal();
-        Company company = (Company)activeUser.getUser();
+        ActiveUser activeUser = (ActiveUser) SecurityUtils.getSubject().getPrincipal();
+        Company company = (Company) activeUser.getUser();
         // 设置查询条件
         QueryWrapper<Recruit> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("company_id", company.getId());
-        queryWrapper.eq("status",1);
+        queryWrapper.eq("status", 1);
         Page<Recruit> page = new Page<>(recruitVo.getCurrentPage(), recruitVo.getPageSize());
         Page<Recruit> recruitPage = recruitService.page(page, queryWrapper);
         return R.ok("查询成功").put("data", recruitPage);
@@ -102,13 +104,11 @@ public class RecruitController {
     @RequiresRoles("student")
     public R queryAllRecruit(RecruitVo recruitVo) {
         QueryWrapper<Recruit> queryWrapper = new QueryWrapper<>();
-        if (!StringUtils.isEmpty(recruitVo.getCondition())) {
-            queryWrapper.like("position", recruitVo.getCondition()).or().like("content",recruitVo .getCondition());
-        }
+        Student student = ShiroUtils.getStudentShiro();
         // 查询status为0，即招聘中的招聘信息
         queryWrapper.eq("status", 0);
         Page<Recruit> page = new Page<>(recruitVo.getCurrentPage(), recruitVo.getPageSize());
-        Page<Recruit> recruitPage = recruitMapper.queryAllRecruitAndCompany(page, queryWrapper);
+        Page<Recruit> recruitPage = recruitMapper.queryAllRecruitAndCompany(page, student.getId(), recruitVo.getCondition());
         return R.ok("查询成功").put("data", recruitPage);
     }
 
@@ -140,7 +140,7 @@ public class RecruitController {
     /**
      * 修改招聘信息的状态
      *
-     * @param id     招聘信息ID
+     * @param id 招聘信息ID
      * @return
      */
     @PutMapping("/recruit/{id}")

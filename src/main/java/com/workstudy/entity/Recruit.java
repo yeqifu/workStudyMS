@@ -86,4 +86,10 @@ public class Recruit {
      */
     @TableField(exist = false)
     private Company company;
+
+    /**
+     * 是否被收藏
+     */
+    @TableField(exist = false)
+    private Boolean collected;
 }

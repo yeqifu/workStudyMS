@@ -12,4 +12,8 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class CollectionServiceImpl extends ServiceImpl<CollectionMapper, Collection> implements CollectionService {
+    @Override
+    public boolean removeCollection(Integer studentId, Integer recruitId) {
+        return baseMapper.removeCollection(studentId,recruitId);
+    }
 }

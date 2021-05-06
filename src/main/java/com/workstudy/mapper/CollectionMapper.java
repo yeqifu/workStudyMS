@@ -17,8 +17,17 @@ public interface CollectionMapper extends BaseMapper<Collection> {
     /**
      * 查询学生收藏的所有招聘信息
      * @param page
+     * @param type
      * @param condition
      * @return
      */
-    Page<Collection> queryCollectionAndRecruit(Page<Collection> page, @Param("condition")String condition);
+    Page<Collection> queryCollectionAndRecruit(Page<Collection> page,@Param("type") Integer type);
+
+    /**
+     * 学生取消对招聘信息的收藏
+     * @param studentId
+     * @param recruitId
+     * @return
+     */
+    boolean removeCollection(@Param("studentId") Integer studentId,@Param("recruitId") Integer recruitId);
 }

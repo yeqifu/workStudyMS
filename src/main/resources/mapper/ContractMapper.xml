@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.workstudy.mapper.ContractMapper">
+    <resultMap id="BaseResultMap" type="com.workstudy.entity.Contract">
+        <!--@mbg.generated-->
+        <!--@Table contract-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="name" jdbcType="VARCHAR" property="name"/>
+        <result column="content" jdbcType="VARCHAR" property="content"/>
+        <result column="company_id" jdbcType="INTEGER" property="companyId"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@mbg.generated-->
+        id, `name`, content, company_id, create_time
+    </sql>
+    <!--根据合同ID查询合同-->
+    <select id="queryContractById" resultMap="BaseResultMap">
+        select * from contract where id = #{id,jdbcType=INTEGER};
+    </select>
+</mapper>

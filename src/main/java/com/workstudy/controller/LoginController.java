@@ -72,12 +72,10 @@ public class LoginController {
                 menuTreeNodes.add(new MenuTreeNode(2, 1, 2, "申请指导老师", "/applyTeacher"));
                 menuTreeNodes.add(new MenuTreeNode(3, 0, 1, "求职管理", null));
                 menuTreeNodes.add(new MenuTreeNode(4, 3, 2, "个人简历", "/resume"));
-                menuTreeNodes.add(new MenuTreeNode(5, 3, 2, "查看岗位", "/recruit"));
+                menuTreeNodes.add(new MenuTreeNode(5, 3, 2, "查看岗位", "/recruitQuery"));
                 menuTreeNodes.add(new MenuTreeNode(11, 3, 2, "我的收藏", "/collection"));
                 menuTreeNodes.add(new MenuTreeNode(6, 0, 1, "岗位申请", null));
                 menuTreeNodes.add(new MenuTreeNode(7, 6, 2, "岗位申请管理", "/applyRecruit"));
-                menuTreeNodes.add(new MenuTreeNode(8, 0, 2, "合同备案", null));
-                menuTreeNodes.add(new MenuTreeNode(9, 8, 2, "合同备案管理", "/contractRecord"));
                 menuTreeNodes.add(new MenuTreeNode(10, 8, 2, "老师留言管理", "/message"));
                 menu = MenuTreeNode.build(menuTreeNodes, 0);
             } else if (type == 1) {
@@ -88,7 +86,7 @@ public class LoginController {
                 menuTreeNodes.add(new MenuTreeNode(3, 0, 1, "学生在岗", null));
                 menuTreeNodes.add(new MenuTreeNode(4, 3, 2, "指导学生在岗管理", "/studentWork"));
                 menuTreeNodes.add(new MenuTreeNode(5, 0, 1, "合同备案", null));
-                menuTreeNodes.add(new MenuTreeNode(6, 5, 2, "合同备案管理", "/contractRecord"));
+                menuTreeNodes.add(new MenuTreeNode(6, 5, 2, "合同备案管理", "/contractTeacher"));
                 menuTreeNodes.add(new MenuTreeNode(7, 0, 1, "留言信息", null));
                 menuTreeNodes.add(new MenuTreeNode(8, 7, 2, "学生留言信息管理", "/message"));
                 menu = MenuTreeNode.build(menuTreeNodes, 0);
@@ -99,8 +97,8 @@ public class LoginController {
                 menuTreeNodes.add(new MenuTreeNode(2, 1, 2, "招聘信息管理", "/recruit"));
                 menuTreeNodes.add(new MenuTreeNode(3, 0, 1, "求职信息", null));
                 menuTreeNodes.add(new MenuTreeNode(4, 3, 2, "求职信息管理", "/jobApply"));
-                menuTreeNodes.add(new MenuTreeNode(5, 0, 1, "合同备案", null));
-                menuTreeNodes.add(new MenuTreeNode(6, 5, 2, "合同备案管理", "/contractRecord"));
+                menuTreeNodes.add(new MenuTreeNode(5, 0, 1, "合同信息", null));
+                menuTreeNodes.add(new MenuTreeNode(6, 5, 2, "合同信息管理", "/contractCompany"));
                 menu = MenuTreeNode.build(menuTreeNodes, 0);
             } else if (type == 3) {
                 usernamePasswordToken = new ManagerToken(userName, password);

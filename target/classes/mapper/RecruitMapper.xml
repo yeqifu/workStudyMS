@@ -30,6 +30,7 @@
         <result column="phone" jdbcType="VARCHAR" property="phone"/>
         <result column="publish_time" jdbcType="TIMESTAMP" property="publishTime"/>
         <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="collected" jdbcType="BOOLEAN" property="collected"/>
         <association property="company" javaType="com.workstudy.entity.Company" column="company_id"
                      select="queryCompanyById">
         </association>
@@ -39,9 +40,14 @@
         id, company_id, `position`, address, content, work_time, salary, contact, phone,
         publish_time, `status`
     </sql>
-
+    <!--学生查询所有招聘信息-->
     <select id="queryAllRecruitAndCompany" resultMap="BaseResultMapTwo">
-        select * from recruit ${ew.customSqlSegment}
+        SELECT
+	      recruit.*,
+	      ( SELECT count(collection.id) FROM collection WHERE recruit.id = collection.recruit_id AND collection.student_id = #{type,jdbcType=INTEGER} )  AS collected
+        FROM
+	      recruit
+        where recruit.status = 0
     </select>
 
 

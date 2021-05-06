@@ -16,8 +16,8 @@
         <result column="student_id" jdbcType="INTEGER" property="studentId"/>
         <result column="recruit_id" jdbcType="INTEGER" property="recruitId"/>
         <result column="time" jdbcType="TIMESTAMP" property="time"/>
-        <association property="recruit" javaType="com.workstudy.entity.Recruit" column="recruit_id" select="com.workstudy.mapper.RecruitMapper.queryRecruitById">
-
+        <association property="recruit" javaType="com.workstudy.entity.Recruit" column="recruit_id"
+                     select="com.workstudy.mapper.RecruitMapper.queryRecruitById">
         </association>
     </resultMap>
     <sql id="Base_Column_List">
@@ -29,12 +29,15 @@
         select * from collection
         left join recruit on recruit.id = collection.recruit_id
         <where>
-            <if test="condition != null and condition != ''">
-                 recruit.position like concat('%',#{condition,jdbcType=VARCHAR},'%') or
-            </if>
-            <if test="condition != null and condition != ''">
-                recruit.content like concat('%',#{condition,jdbcType=VARCHAR},'%')
+            <if test="type != null">
+                collection.student_id = #{type,jdbcType=INTEGER}
             </if>
         </where>
+        order by time desc
     </select>
+    <!--学生取消对招聘信息的收藏-->
+    <delete id="removeCollection">
+        delete from collection
+        where student_id = #{studentId,jdbcType=INTEGER} and recruit_id = #{recruitId,jdbcType=INTEGER}
+    </delete>
 </mapper>

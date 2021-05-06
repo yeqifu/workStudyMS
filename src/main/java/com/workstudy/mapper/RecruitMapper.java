@@ -29,12 +29,13 @@ public interface RecruitMapper extends BaseMapper<Recruit> {
     Company queryCompanyById(Integer id);
 
     /**
-     * 查询所有招聘信息对应的公司信息
+     * 学生查询所有招聘信息
      * @param page
-     * @param queryWrapper
+     * @param type 学生ID
+     * @param condition
      * @return
      */
-    Page<Recruit> queryAllRecruitAndCompany(Page<Recruit> page, @Param(Constants.WRAPPER)Wrapper<Recruit> queryWrapper);
+    Page<Recruit> queryAllRecruitAndCompany(Page<Recruit> page,@Param("type") Integer type, @Param("condition")String condition);
 
     /**
      * 根据招聘信息ID查询招聘信息

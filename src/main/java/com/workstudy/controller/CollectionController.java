@@ -2,6 +2,7 @@ package com.workstudy.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.workstudy.common.realm.ActiveUser;
+import com.workstudy.common.shiro.ShiroUtils;
 import com.workstudy.common.utils.CRUDRUtils;
 import com.workstudy.common.utils.R;
 import com.workstudy.entity.Collection;
@@ -38,8 +39,9 @@ public class CollectionController {
     @GetMapping("/collect")
     @RequiresRoles("student")
     public R queryAllCollection(CollectionVo collectionVo) {
+        Student student = ShiroUtils.getStudentShiro();
         Page<Collection> page = new Page<>(collectionVo.getCurrentPage(), collectionVo.getPageSize());
-        Page collectionAndRecruitPage = collectionMapper.queryCollectionAndRecruit(page, collectionVo.getCondition());
+        Page<Collection> collectionAndRecruitPage = collectionMapper.queryCollectionAndRecruit(page, student.getId());
         return R.ok("查询成功").put("data", collectionAndRecruitPage);
     }
 
@@ -71,13 +73,14 @@ public class CollectionController {
     /**
      * 学生取消收藏招聘信息
      *
-     * @param id
+     * @param id  招聘信息ID
      * @return
      */
-    @DeleteMapping("/cancelCollect/{id}")
+    @PostMapping("/cancelCollect/{id}")
     @RequiresRoles("student")
     public R cancelRecruit(@PathVariable("id") Integer id) {
-        boolean flag = collectionService.removeById(id);
+        Student student = ShiroUtils.getStudentShiro();
+        boolean flag = collectionService.removeCollection(student.getId(),id);
         if (flag == true) {
             return R.ok("取消收藏成功");
         } else {

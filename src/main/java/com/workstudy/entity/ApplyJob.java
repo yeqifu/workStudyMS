@@ -7,14 +7,16 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
-* @Author: 落亦-
-* @Date: 2021/5/5 17:20
-*/
+ * @Author: 落亦-
+ * @Date: 2021/5/5 17:20
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -46,6 +48,12 @@ public class ApplyJob implements Serializable {
      */
     @TableField(value = "recruit_id")
     private Integer recruitId;
+
+    /**
+     * 老师ID
+     */
+    @TableField(value = "teacher_id")
+    private Integer teacherId;
 
     /**
      * 学生申请时间
@@ -121,4 +129,10 @@ public class ApplyJob implements Serializable {
 
     @TableField(exist = false)
     private Recruit recruit;
+
+    @TableField(exist = false)
+    private Contract contract;
+
+    @TableField(exist = false)
+    private List<WorkReport> workReport;
 }

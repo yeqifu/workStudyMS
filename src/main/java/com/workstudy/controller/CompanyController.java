@@ -59,14 +59,13 @@ public class CompanyController {
     @RequiresRoles("company")
     public R updateCompany(@RequestBody Company company){
         Company companyDataBase = companyService.getById(company.getId());
-
-        String newPassword = company.getPassword();
-        if (null!=newPassword){
-            String newPasswordEncryption = new Md5Hash(newPassword,companyDataBase.getSalt(),Constant.HASHITERATIONS).toString();
-            company.setPassword(newPasswordEncryption);
-        }
         boolean flag = companyService.updateById(company);
-        return CRUDRUtils.updateR(flag);
+        Company newCompany = companyService.getById(companyDataBase.getId());
+        if (flag){
+            return R.ok("修改成功!").put("data",newCompany);
+        }else {
+            return R.error("修改失败!");
+        }
     }
 
 }

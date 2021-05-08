@@ -58,7 +58,7 @@
     <select id="queryMyCheckSuccessOrFailAll" resultMap="BaseResultMapThree">
         select * from student_apply_teacher
         left join student on student.student_number = student_apply_teacher.student_number
-        where student_apply_teacher.teacher_number = #{teacherNumber,jdbcType=VARCHAR} and student_apply_teacher.status=1 or student_apply_teacher.status = 2
+        where student_apply_teacher.teacher_number = #{teacherNumber,jdbcType=VARCHAR} and (student_apply_teacher.status=1 or student_apply_teacher.status = 2)
         order by apply_date desc
     </select>
 </mapper>

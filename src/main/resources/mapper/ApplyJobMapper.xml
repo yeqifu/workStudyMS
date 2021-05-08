@@ -189,17 +189,76 @@
                      select="com.workstudy.mapper.ContractMapper.queryContractById">
         </association>
     </resultMap>
+    <resultMap id="BaseResultMapEight" type="com.workstudy.entity.ApplyJob">
+        <!--@mbg.generated-->
+        <!--@Table apply_job-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="student_id" jdbcType="INTEGER" property="studentId"/>
+        <result column="resume_id" jdbcType="INTEGER" property="resumeId"/>
+        <result column="company_id" jdbcType="INTEGER" property="companyId"/>
+        <result column="recruit_id" jdbcType="INTEGER" property="recruitId"/>
+        <result column="apply_time" jdbcType="TIMESTAMP" property="applyTime"/>
+        <result column="reply_time" jdbcType="TIMESTAMP" property="replyTime"/>
+        <result column="reason" jdbcType="VARCHAR" property="reason"/>
+        <result column="company_check" jdbcType="TINYINT" property="companyCheck"/>
+        <result column="student_check" jdbcType="TINYINT" property="studentCheck"/>
+        <result column="teacher_check" jdbcType="TINYINT" property="teacherCheck"/>
+        <result column="student_comment" jdbcType="VARCHAR" property="studentComment"/>
+        <result column="student_comment_star" jdbcType="INTEGER" property="studentCommentStar"/>
+        <result column="company_comment" jdbcType="VARCHAR" property="companyComment"/>
+        <result column="company_comment_star" jdbcType="INTEGER" property="companyCommentStar"/>
+        <result column="contract_id" jdbcType="INTEGER" property="contractId"/>
+        <association property="company" javaType="com.workstudy.entity.Company" column="company_id"
+                     select="com.workstudy.mapper.RecruitMapper.queryCompanyById">
+        </association>
+        <association property="recruit" javaType="com.workstudy.entity.Recruit" column="recruit_id"
+                     select="com.workstudy.mapper.RecruitMapper.queryRecruitById">
+        </association>
+        <association property="student" javaType="com.workstudy.entity.Student" column="student_id"
+                     select="com.workstudy.mapper.StudentMapper.queryStudentById">
+        </association>
+    </resultMap>
+    <resultMap id="BaseResultMapTen" type="com.workstudy.entity.ApplyJob">
+        <!--@mbg.generated-->
+        <!--@Table apply_job-->
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="student_id" jdbcType="INTEGER" property="studentId"/>
+        <result column="resume_id" jdbcType="INTEGER" property="resumeId"/>
+        <result column="company_id" jdbcType="INTEGER" property="companyId"/>
+        <result column="recruit_id" jdbcType="INTEGER" property="recruitId"/>
+        <result column="apply_time" jdbcType="TIMESTAMP" property="applyTime"/>
+        <result column="reply_time" jdbcType="TIMESTAMP" property="replyTime"/>
+        <result column="reason" jdbcType="VARCHAR" property="reason"/>
+        <result column="company_check" jdbcType="TINYINT" property="companyCheck"/>
+        <result column="student_check" jdbcType="TINYINT" property="studentCheck"/>
+        <result column="teacher_check" jdbcType="TINYINT" property="teacherCheck"/>
+        <result column="student_comment" jdbcType="VARCHAR" property="studentComment"/>
+        <result column="student_comment_star" jdbcType="INTEGER" property="studentCommentStar"/>
+        <result column="company_comment" jdbcType="VARCHAR" property="companyComment"/>
+        <result column="company_comment_star" jdbcType="INTEGER" property="companyCommentStar"/>
+        <result column="contract_id" jdbcType="INTEGER" property="contractId"/>
+        <association property="student" javaType="com.workstudy.entity.Student" column="student_id"
+                     select="com.workstudy.mapper.StudentMapper.queryStudentById">
+        </association>
+        <association property="recruit" javaType="com.workstudy.entity.Recruit" column="recruit_id"
+                     select="com.workstudy.mapper.RecruitMapper.queryRecruitById">
+        </association>
+        <association property="resume" javaType="com.workstudy.entity.Resume" column="resume_id"
+                     select="com.workstudy.mapper.ResumeMapper.queryResumeById">
+        </association>
+    </resultMap>
     <sql id="Base_Column_List">
         <!--@mbg.generated-->
         id, student_id, resume_id, company_id, recruit_id, apply_time, reply_time, reason,
         company_check, student_check, teacher_check, student_comment, student_comment_star,
         company_comment, company_comment_star, contract_id
     </sql>
-    <!--公司分页查询所有学生对工作的申请  未审核-->
-    <select id="queryApplyJobAllUncheckByCompany" resultMap="BaseResultMapThree">
+    <!--公司分页查询所有学生对工作的申请  未审核   or apply_job.company_check = 1-->
+    <select id="queryApplyJobAllUncheckByCompany" resultMap="BaseResultMapTen">
         select * from apply_job
         left join student on student.id = apply_job.student_id
         left join recruit on recruit.id = apply_job.recruit_id
+        left join resume on resume.id = apply_job.resume_id
         <where>
             <if test="status != null">
                 apply_job.company_check = #{status,jdbcType=INTEGER}
@@ -211,6 +270,7 @@
                 and student.name like concat('%',#{condition,jdbcType=VARCHAR},'%')
             </if>
         </where>
+        order by apply_job.id desc
     </select>
     <!--查询正在该公司工作的学生-->
     <select id="queryApplyJobAllWork" resultMap="BaseResultMapThree">
@@ -218,16 +278,15 @@
         left join student on student.id = apply_job.student_id
         left join recruit on recruit.id = apply_job.recruit_id
         <where>
-            <if test="status != null">
-                apply_job.teacher_check = #{status,jdbcType=INTEGER}
-            </if>
             <if test="type != null">
                 and apply_job.company_id = #{type,jdbcType=INTEGER}
             </if>
             <if test="condition != null and condition != ''">
                 and student.name like concat('%',#{condition,jdbcType=VARCHAR},'%')
             </if>
+            and apply_job.teacher_check = 1 and (apply_job.company_check!=3 and apply_job.student_check!=3)
         </where>
+        order by apply_job.id desc
     </select>
     <!--查询所有已完成工作的学生-->
     <select id="queryFinishApplyJob" resultMap="BaseResultMapThree">
@@ -241,8 +300,9 @@
             <if test="condition != null and condition != ''">
                 and student.name like concat('%',#{condition,jdbcType=VARCHAR},'%')
             </if>
-            and apply_job.student_check = 6 or apply_job.company_check = 3
+            and apply_job.student_check = 3 or apply_job.company_check = 3
         </where>
+        order by apply_job.id desc
     </select>
     <!--学生查询所有已经申请的工作   拒绝和公司通过的-->
     <select id="queryApplyJobAllRejectOrPass" resultMap="BaseResultMapSeven">
@@ -259,8 +319,9 @@
             </if>
             and apply_job.company_check = 1 or apply_job.company_check = 0
         </where>
+        order by apply_job.id desc
     </select>
-
+    <!--学生查询所有正在进行中的工作-->
     <select id="queryApplyJobAllWorkStudent" resultMap="BaseResultMapFour">
         select * from apply_job
         left join company on company.id = apply_job.company_id
@@ -272,8 +333,9 @@
             <if test="condition != null and condition != ''">
                 and company.name like concat('%',#{condition,jdbcType=VARCHAR},'%')
             </if>
-            and apply_job.teacher_check = 7
+            and apply_job.teacher_check = 1 and apply_job.student_check!=3
         </where>
+        order by apply_job.id desc
     </select>
 
     <!--学生查询所有已完成的工作-->
@@ -285,8 +347,9 @@
             <if test="type != null">
                 apply_job.student_id = #{type,jdbcType=INTEGER}
             </if>
-            and apply_job.student_check = 6 or company_check = 3
+            and (apply_job.student_check = 3 or company_check = 3)
         </where>
+        order by apply_job.id desc
     </select>
     <!--老师查询所有未审核的学生工作申请   未备案-->
     <select id="queryApplyJobUncheck" resultMap="BaseResultMapFive">
@@ -302,8 +365,9 @@
             <if test="condition != null and condition != ''">
                 and student.name like concat('%',#{condition,jdbcType=VARCHAR},'%')
             </if>
-            and apply_job.student_check = 4
+            and apply_job.student_check = 1 and teacher_check is null
         </where>
+        order by apply_job.id desc
     </select>
     <!--老师查询所有正在工作中的学生-->
     <select id="queryAgreeApplyJobStudentWork" resultMap="BaseResultMapSix">
@@ -319,8 +383,9 @@
             <if test="condition != null and condition != ''">
                 and student.name like concat('%',#{condition,jdbcType=VARCHAR},'%')
             </if>
-            and apply_job.teacher_check = 7
+            and apply_job.teacher_check = 1
         </where>
+        order by apply_job.id desc
     </select>
     <!--老师查询所有已经完成工作中的学生-->
     <select id="queryAgreeApplyJobStudentFinishWork" resultMap="BaseResultMapSix">
@@ -336,7 +401,22 @@
             <if test="condition != null and condition != ''">
                 and student.name like concat('%',#{condition,jdbcType=VARCHAR},'%')
             </if>
-            and apply_job.company_check = 3 or student_check = 6
+            and (apply_job.company_check = 3 or student_check = 3)
         </where>
+        order by apply_job.id desc
+    </select>
+    <!--公司查询所有的评价-->
+    <select id="queryAgreeApplyJobComment" resultMap="BaseResultMapEight">
+        select * from apply_job
+        left join company on company.id = apply_job.company_id
+        left join student on student.id = apply_job.student_id
+        left join recruit on recruit.id = apply_job.recruit_id
+        <where>
+            <if test="condition != null and condition != ''">
+                student.name like CONCAT('%',#{condition,jdbcType=VARCHAR},'%')
+            </if>
+            and (apply_job.company_check = 3 or student_check = 3)
+        </where>
+        order by apply_job.id desc
     </select>
 </mapper>

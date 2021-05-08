@@ -8,7 +8,7 @@
         <result column="student_id" jdbcType="INTEGER" property="studentId"/>
         <result column="apply_job_id" jdbcType="INTEGER" property="applyJobId"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="content" jdbcType="VARCHAR" property="content"/>
+        <result column="content" jdbcType="LONGVARCHAR" property="content"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
     </resultMap>
     <sql id="Base_Column_List">

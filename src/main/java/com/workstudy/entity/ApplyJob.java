@@ -134,5 +134,8 @@ public class ApplyJob implements Serializable {
     private Contract contract;
 
     @TableField(exist = false)
+    private Resume resume;
+
+    @TableField(exist = false)
     private List<WorkReport> workReport;
 }

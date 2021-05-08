@@ -18,4 +18,10 @@ public interface ResumeMapper extends BaseMapper<Resume> {
      */
     List<Resume> queryResumeAll(@Param("studentId") Integer id);
 
+    /**
+     * 根据简历ID查询简历
+     * @param id
+     * @return
+     */
+    Resume queryResumeById(@Param("id") Integer id);
 }

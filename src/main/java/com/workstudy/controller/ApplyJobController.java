@@ -3,13 +3,11 @@ package com.workstudy.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.workstudy.common.shiro.ShiroUtils;
+import com.workstudy.common.utils.CRUDRUtils;
 import com.workstudy.common.utils.R;
 import com.workstudy.entity.*;
 import com.workstudy.mapper.ApplyJobMapper;
-import com.workstudy.service.ApplyJobService;
-import com.workstudy.service.StudentApplyTeacherService;
-import com.workstudy.service.TeacherService;
-import com.workstudy.service.WorkReportService;
+import com.workstudy.service.*;
 import com.workstudy.vo.ApplyJobVo;
 import org.apache.ibatis.annotations.Param;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -30,6 +28,9 @@ public class ApplyJobController {
 
     @Autowired
     private ApplyJobMapper applyJobMapper;
+
+    @Autowired
+    private RecruitService recruitService;
 
     @Autowired
     private StudentApplyTeacherService studentApplyTeacherService;
@@ -102,7 +103,7 @@ public class ApplyJobController {
     public R queryApplyJobAllWork(ApplyJobVo applyJobVo) {
         Company company = ShiroUtils.getCompanyShiro();
         Page<ApplyJob> page = new Page<>(applyJobVo.getCurrentPage(), applyJobVo.getPageSize());
-        Page<ApplyJob> applyJobAllWorkByCompanyPage = applyJobMapper.queryApplyJobAllWork(page, company.getId(), 7, applyJobVo.getCondition());
+        Page<ApplyJob> applyJobAllWorkByCompanyPage = applyJobMapper.queryApplyJobAllWork(page, company.getId(), 1, applyJobVo.getCondition());
         return R.ok("查询成功").put("data", applyJobAllWorkByCompanyPage);
     }
 
@@ -149,7 +150,7 @@ public class ApplyJobController {
      * @param star    公司对学生的打分
      * @return
      */
-    @PostMapping("/company/comment/{id}")
+    @PutMapping("/company/comment/{id}")
     @RequiresRoles("company")
     public R commentForStudentApplyJob(@PathVariable("id") Integer id, @Param("comment") String comment, @Param("star") Integer star) {
         ApplyJob applyJob = applyJobService.getById(id);
@@ -184,21 +185,26 @@ public class ApplyJobController {
             if (aBoolean) {
                 return R.error("您已经申请了这份工作，等待公司审核中，请勿重复申请！");
             } else {
-                String teacherNumber = (String) r.get("teacherNumber");
-                Teacher teacher = teacherService.queryTeacherByTeacherNumber(teacherNumber);
-                ApplyJob applyJob = new ApplyJob();
-                applyJob.setStudentId(student.getId());
-                applyJob.setRecruitId(recruitId);
-                applyJob.setCompanyId(companyId);
-                applyJob.setTeacherId(teacher.getId());
-                applyJob.setResumeId(resumeId);
-                applyJob.setCompanyCheck((byte) 0);
-                applyJob.setApplyTime(new Date());
-                boolean save = applyJobService.save(applyJob);
-                if (save) {
-                    return R.ok("申请成功，请等待公司审核！");
-                } else {
-                    return R.error("申请失败！");
+                Recruit recruit = recruitService.getById(recruitId);
+                if (recruit.getStatus()==1){
+                    return R.error("此工作已结束招聘，请申请其它工作！");
+                }else {
+                    String teacherNumber = (String) r.get("teacherNumber");
+                    Teacher teacher = teacherService.queryTeacherByTeacherNumber(teacherNumber);
+                    ApplyJob applyJob = new ApplyJob();
+                    applyJob.setStudentId(student.getId());
+                    applyJob.setRecruitId(recruitId);
+                    applyJob.setCompanyId(companyId);
+                    applyJob.setTeacherId(teacher.getId());
+                    applyJob.setResumeId(resumeId);
+                    applyJob.setCompanyCheck((byte) 0);
+                    applyJob.setApplyTime(new Date());
+                    boolean save = applyJobService.save(applyJob);
+                    if (save) {
+                        return R.ok("申请成功，请等待公司审核！");
+                    } else {
+                        return R.error("申请失败！");
+                    }
                 }
             }
         } else {
@@ -255,16 +261,22 @@ public class ApplyJobController {
         Student student = ShiroUtils.getStudentShiro();
         ApplyJob applyJob = applyJobService.getById(id);
         if (type == 1) {
-            applyJob.setStudentCheck((byte) 4);
+            applyJob.setStudentCheck((byte) 1);
+            boolean flag = applyJobService.updateById(applyJob);
+            if (flag) {
+                return R.ok("签署合同成功，请等待指导老师审核！");
+            } else {
+                return R.error("签署合同失败！");
+            }
         } else {
-            applyJob.setStudentCheck((byte) 5);
+            applyJob.setStudentCheck((byte) 2);
             applyJob.setReason(reason);
-        }
-        boolean flag = applyJobService.updateById(applyJob);
-        if (flag) {
-            return R.ok("签署合同成功，请等待指导老师审核！");
-        } else {
-            return R.error("签署合同失败！");
+            boolean flag = applyJobService.updateById(applyJob);
+            if (flag) {
+                return R.ok("拒绝成功！");
+            } else {
+                return R.error("签署合同失败！");
+            }
         }
     }
 
@@ -324,8 +336,8 @@ public class ApplyJobController {
     @RequiresRoles("student")
     public R quitApplyJobStudent(@PathVariable("id") Integer id, String reason) {
         ApplyJob applyJob = applyJobService.getById(id);
-        // 设置学生状态为6  已离职
-        applyJob.setStudentCheck((byte) 6);
+        // 设置学生状态为3  已离职
+        applyJob.setStudentCheck((byte) 3);
         applyJob.setReason(reason);
         boolean flag = applyJobService.updateById(applyJob);
         if (flag) {
@@ -342,7 +354,7 @@ public class ApplyJobController {
      * @param workReport
      * @return
      */
-    @PostMapping("/uploadWorkReport")
+    @PostMapping("/student/uploadWorkReport")
     @RequiresRoles("student")
     public R uploadWorkReport(@RequestBody WorkReport workReport) {
         Student student = ShiroUtils.getStudentShiro();
@@ -356,6 +368,29 @@ public class ApplyJobController {
         }
     }
 
+    /**
+     * 学生修改工作报告
+     * @param workReport
+     * @return
+     */
+    @PutMapping("/student/updateWorkReport")
+    @RequiresRoles("student")
+    public R updateWorkReport(@RequestBody WorkReport workReport){
+        boolean flag = workReportService.updateById(workReport);
+        return CRUDRUtils.updateR(flag);
+    }
+
+    /**
+     * 学生删除工作报告
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/student/deleteWorkReport/{id}")
+    @RequiresRoles("student")
+    public R deleteWorkReport(@PathVariable("id") Integer id){
+        boolean flag = workReportService.removeById(id);
+        return CRUDRUtils.deleteR(flag);
+    }
 
     /**
      * 学生查询所有已完成的工作
@@ -424,16 +459,22 @@ public class ApplyJobController {
     public R teacherAgreeApplyJob(@PathVariable("id") Integer id, @PathVariable("type") Integer type, @RequestParam(value = "reason", required = false) String reason) {
         ApplyJob applyJob = applyJobService.getById(id);
         if (type == 1) {
-            applyJob.setTeacherCheck((byte) 7);
+            applyJob.setTeacherCheck((byte) 1);
+            boolean flag = applyJobService.updateById(applyJob);
+            if (flag) {
+                return R.ok("备案成功！");
+            } else {
+                return R.error("备案失败！");
+            }
         } else {
-            applyJob.setTeacherCheck((byte) 8);
+            applyJob.setTeacherCheck((byte) 2);
             applyJob.setReason(reason);
-        }
-        boolean flag = applyJobService.updateById(applyJob);
-        if (flag) {
-            return R.ok("备案成功！");
-        } else {
-            return R.error("备案失败！");
+            boolean flag = applyJobService.updateById(applyJob);
+            if (flag) {
+                return R.ok("拒绝成功！");
+            } else {
+                return R.error("拒绝失败！");
+            }
         }
     }
 
@@ -461,6 +502,21 @@ public class ApplyJobController {
         Page<ApplyJob> page = new Page<>(applyJobVo.getCurrentPage(), applyJobVo.getPageSize());
         Page<ApplyJob> applyJobStudentWorkPage = applyJobMapper.queryAgreeApplyJobStudentFinishWork(page, teacher.getId(), applyJobVo.getCondition());
         return R.ok("查询成功").put("data", applyJobStudentWorkPage);
+    }
+
+    //*********************管理员***************************//
+
+    /**
+     * 查询评价信息   公司对学生   学生对公司
+     * @param applyJobVo
+     * @return
+     */
+    @GetMapping("/manager/comment")
+    @RequiresRoles("manager")
+    public R queryApplyJobComment(ApplyJobVo applyJobVo){
+        Page<ApplyJob> page = new Page<>(applyJobVo.getCurrentPage(), applyJobVo.getPageSize());
+        Page<ApplyJob> applyJobCommentPage = applyJobMapper.queryAgreeApplyJobComment(page, applyJobVo.getCondition());
+        return R.ok("查询成功").put("data", applyJobCommentPage);
     }
 
 

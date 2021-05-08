@@ -13,7 +13,7 @@ public interface ApplyJobMapper extends BaseMapper<ApplyJob> {
     /**
      * 公司分页查询所有学生对工作的申请----未审核
      * @param page
-     * @param type 类型  公司ID  学生ID
+     * @param type 类型  公司ID
      * @param status 状态
      * @param condition
      * @return
@@ -24,7 +24,7 @@ public interface ApplyJobMapper extends BaseMapper<ApplyJob> {
      * 查询正在该公司工作的学生
      * @param page
      * @param type      公司ID
-     * @param status    状态  7-老师同意（即学生正在工作中）
+     * @param status    状态  1-老师同意（即学生正在工作中）
      * @param condition
      * @return
      */
@@ -91,4 +91,12 @@ public interface ApplyJobMapper extends BaseMapper<ApplyJob> {
      * @return
      */
     Page<ApplyJob> queryAgreeApplyJobStudentFinishWork(Page<ApplyJob> page,@Param("type") Integer type,@Param("condition") String condition);
+
+    /**
+     * 管理员查询所有的评价
+     * @param page
+     * @param condition
+     * @return
+     */
+    Page<ApplyJob> queryAgreeApplyJobComment(Page<ApplyJob> page,@Param("condition") String condition);
 }

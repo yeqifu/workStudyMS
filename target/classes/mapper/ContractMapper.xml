@@ -6,7 +6,7 @@
         <!--@Table contract-->
         <id column="id" jdbcType="INTEGER" property="id"/>
         <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="content" jdbcType="VARCHAR" property="content"/>
+        <result column="content" jdbcType="LONGVARCHAR" property="content"/>
         <result column="company_id" jdbcType="INTEGER" property="companyId"/>
         <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
     </resultMap>

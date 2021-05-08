@@ -57,6 +57,18 @@ public class ContractController {
     }
 
     /**
+     * 根据合同ID查询合同
+     * @param id
+     * @return
+     */
+    @GetMapping("/contract/{id}")
+    @RequiresRoles("company")
+    public R getContractById(@PathVariable("id") Integer id){
+        Contract contract = contractService.getById(id);
+        return R.ok("查询成功！").put("data",contract);
+    }
+
+    /**
      * 公司修改合同
      * @param contract
      * @return

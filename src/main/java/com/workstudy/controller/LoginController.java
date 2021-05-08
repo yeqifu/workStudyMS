@@ -76,7 +76,7 @@ public class LoginController {
                 menuTreeNodes.add(new MenuTreeNode(11, 3, 2, "我的收藏", "/collection"));
                 menuTreeNodes.add(new MenuTreeNode(6, 0, 1, "岗位申请", null));
                 menuTreeNodes.add(new MenuTreeNode(7, 6, 2, "岗位申请管理", "/applyRecruit"));
-                menuTreeNodes.add(new MenuTreeNode(10, 8, 2, "老师留言管理", "/message"));
+                menuTreeNodes.add(new MenuTreeNode(8, 6, 2, "工作评价", "/workComment"));
                 menu = MenuTreeNode.build(menuTreeNodes, 0);
             } else if (type == 1) {
                 usernamePasswordToken = new TeacherToken(userName, password);
@@ -85,10 +85,6 @@ public class LoginController {
                 menuTreeNodes.add(new MenuTreeNode(2, 1, 2, "审核指导申请", "/checkApply"));
                 menuTreeNodes.add(new MenuTreeNode(3, 0, 1, "学生在岗", null));
                 menuTreeNodes.add(new MenuTreeNode(4, 3, 2, "指导学生在岗管理", "/studentWork"));
-                menuTreeNodes.add(new MenuTreeNode(5, 0, 1, "合同备案", null));
-                menuTreeNodes.add(new MenuTreeNode(6, 5, 2, "合同备案管理", "/contractTeacher"));
-                menuTreeNodes.add(new MenuTreeNode(7, 0, 1, "留言信息", null));
-                menuTreeNodes.add(new MenuTreeNode(8, 7, 2, "学生留言信息管理", "/message"));
                 menu = MenuTreeNode.build(menuTreeNodes, 0);
             } else if (type == 2) {
                 usernamePasswordToken = new CompanyToken(userName, password);
@@ -99,6 +95,8 @@ public class LoginController {
                 menuTreeNodes.add(new MenuTreeNode(4, 3, 2, "求职信息管理", "/jobApply"));
                 menuTreeNodes.add(new MenuTreeNode(5, 0, 1, "合同信息", null));
                 menuTreeNodes.add(new MenuTreeNode(6, 5, 2, "合同信息管理", "/contractCompany"));
+                menuTreeNodes.add(new MenuTreeNode(7, 0, 1, "评价管理", null));
+                menuTreeNodes.add(new MenuTreeNode(8, 7, 2, "学生评价管理", "/studentComment"));
                 menu = MenuTreeNode.build(menuTreeNodes, 0);
             } else if (type == 3) {
                 usernamePasswordToken = new ManagerToken(userName, password);
@@ -108,11 +106,7 @@ public class LoginController {
                 menuTreeNodes.add(new MenuTreeNode(3, 1, 2, "老师注册审核管理", "/teacherRegister"));
                 menuTreeNodes.add(new MenuTreeNode(4, 1, 2, "公司注册审核管理", "/companyRegister"));
                 menuTreeNodes.add(new MenuTreeNode(5, 0, 1, "评价管理", null));
-                menuTreeNodes.add(new MenuTreeNode(6, 5, 2, "学生评价公司管理", "/commentCompany"));
-                menuTreeNodes.add(new MenuTreeNode(7, 5, 2, "公司评价学生管理", "/commentStudent"));
-                menuTreeNodes.add(new MenuTreeNode(8, 0, 1, "统计管理", null));
-                menuTreeNodes.add(new MenuTreeNode(9, 8, 2, "暂定", "/contractRecord"));
-                menuTreeNodes.add(new MenuTreeNode(10, 8, 2, "暂定", "/contractRecord"));
+                menuTreeNodes.add(new MenuTreeNode(6, 5, 2, "评价信息管理", "/comment"));
                 menu = MenuTreeNode.build(menuTreeNodes, 0);
             }
             try {

@@ -74,7 +74,7 @@ public class RegisterCheckController {
             queryWrapper.like("name", studentVo.getCondition()).or().like("college", studentVo.getCondition());
         }
         // 查询状态为审核中的学生
-        queryWrapper.eq("status", "1");
+        queryWrapper.eq("status", "1").orderByDesc("id");
         Page<Student> page = new Page<>(studentVo.getCurrentPage(), studentVo.getPageSize());
         Page<Student> studentPage = studentService.page(page, queryWrapper);
         return R.ok("查询成功").put("data", studentPage);
@@ -149,10 +149,10 @@ public class RegisterCheckController {
     public R queryAllCheckTeacher(TeacherVo teacherVo) {
         QueryWrapper<Teacher> queryWrapper = new QueryWrapper<>();
         if (!StringUtils.isEmpty(teacherVo.getCondition())) {
-            queryWrapper.like("name", teacherVo.getCondition()).or().like("college", teacherVo.getCondition());
+            queryWrapper.like("name", teacherVo.getCondition()).or().like("college", teacherVo.getCondition()).orderByDesc("id");
         }
-        // 查询状态为审核中的老师
-        queryWrapper.eq("status", "1");
+        // 查询状态为审核通过的老师
+        queryWrapper.eq("status", "1").orderByDesc("id");
         Page<Teacher> page = new Page<>(teacherVo.getCurrentPage(), teacherVo.getPageSize());
         Page<Teacher> teacherList = teacherService.page(page, queryWrapper);
         return R.ok("查询成功").put("data", teacherList);
@@ -225,9 +225,9 @@ public class RegisterCheckController {
     public R queryAllCheckCompany(CompanyVo companyVo) {
         QueryWrapper<Company> queryWrapper = new QueryWrapper<>();
         if (!StringUtils.isEmpty(companyVo.getCondition())) {
-            queryWrapper.like("name", companyVo.getCondition()).or().like("address", companyVo.getCondition());
+            queryWrapper.like("name", companyVo.getCondition()).or().like("address", companyVo.getCondition()).orderByDesc("id");
         }
-        queryWrapper.eq("status", "1");
+        queryWrapper.eq("status", "1").orderByDesc("id");
         Page<Company> page = new Page<>(companyVo.getCurrentPage(), companyVo.getPageSize());
         Page<Company> companyPage = companyService.page(page, queryWrapper);
         return R.ok("查询成功").put("data", companyPage);

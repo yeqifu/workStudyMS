@@ -23,7 +23,8 @@
         <result column="introduce" jdbcType="VARCHAR" property="introduce"/>
         <result column="remark" jdbcType="VARCHAR" property="remark"/>
         <result column="is_deleted" jdbcType="TINYINT" property="isDeleted"/>
-        <association property="student" javaType="com.workstudy.entity.Student" column="student_id" select="com.workstudy.mapper.StudentMapper.queryStudentById">
+        <association property="student" javaType="com.workstudy.entity.Student" column="student_id"
+                     select="com.workstudy.mapper.StudentMapper.queryStudentById">
         </association>
     </resultMap>
 
@@ -36,5 +37,9 @@
         select * from resume
         left join student on student.id = resume.student_id
         where resume.student_id = #{studentId,jdbcType=INTEGER} and is_deleted = 0
+    </select>
+    <!--根据简历ID查询简历-->
+    <select id="queryResumeById" resultMap="BaseResultMap">
+        select * from resume where id = #{id,jdbcType=INTEGER}
     </select>
 </mapper>

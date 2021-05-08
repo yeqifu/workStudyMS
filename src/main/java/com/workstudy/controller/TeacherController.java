@@ -135,12 +135,12 @@ public class TeacherController {
     @PutMapping("/teacher")
     public R updateTeacher(@RequestBody Teacher teacher){
         Teacher teacherDataBase = teacherService.getById(teacher.getId());
-        String newPassword = teacher.getPassword();
-        if (null!=newPassword){
-            String newPasswordEncryption = new Md5Hash(newPassword,teacherDataBase.getSalt(),Constant.HASHITERATIONS).toString();
-            teacher.setPassword(newPasswordEncryption);
-        }
         boolean flag = teacherService.updateById(teacher);
-        return CRUDRUtils.updateR(flag);
+        Teacher newTeacher = teacherService.getById(teacherDataBase.getId());
+        if (flag){
+            return R.ok("修改成功!").put("data",newTeacher);
+        }else {
+            return R.error("修改失败!");
+        }
     }
 }

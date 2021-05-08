@@ -4,13 +4,14 @@ import cn.hutool.core.util.IdUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.workstudy.common.realm.ActiveUser;
+import com.workstudy.common.shiro.ShiroUtils;
 import com.workstudy.common.utils.CRUDRUtils;
 import com.workstudy.common.utils.Constant;
 import com.workstudy.common.utils.R;
-import com.workstudy.entity.Student;
-import com.workstudy.entity.StudentApplyTeacher;
-import com.workstudy.entity.Teacher;
+import com.workstudy.entity.*;
+import com.workstudy.mapper.ApplyJobMapper;
 import com.workstudy.mapper.StudentApplyTeacherMapper;
+import com.workstudy.service.CompanyService;
 import com.workstudy.service.StudentApplyTeacherService;
 import com.workstudy.service.StudentService;
 import com.workstudy.service.TeacherService;
@@ -19,15 +20,11 @@ import com.workstudy.vo.TeacherVo;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.apache.shiro.crypto.hash.Md5Hash;
-import org.apache.shiro.mgt.SecurityManager;
-import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * @Author: 刘其悦
@@ -43,10 +40,16 @@ public class StudentController {
     private TeacherService teacherService;
 
     @Autowired
+    private CompanyService companyService;
+
+    @Autowired
     private StudentApplyTeacherService studentApplyTeacherService;
 
     @Autowired
     private StudentApplyTeacherMapper studentApplyTeacherMapper;
+
+    @Autowired
+    private ApplyJobMapper applyJobMapper;
 
     /**
      * 学生注册
@@ -181,8 +184,15 @@ public class StudentController {
     @PostMapping("/cancelApplyTeacher/{id}")
     @RequiresRoles("student")
     public R cancelApplyTeacher(@PathVariable("id") Integer id){
-        boolean flag = studentApplyTeacherService.removeById(id);
-        return CRUDRUtils.deleteR(flag);
+        Student student = ShiroUtils.getStudentShiro();
+        Page<ApplyJob> page = new Page<>(1, 10);
+        Page<ApplyJob> applyJobPage = applyJobMapper.queryApplyJobAllWorkStudent(page, student.getId(), null);
+        if (applyJobPage.getSize()>0){
+            return R.error("解绑失败，请先完成工作再解绑！");
+        }else {
+            boolean flag = studentApplyTeacherService.removeById(id);
+            return CRUDRUtils.deleteR(flag);
+        }
     }
 
     /**
@@ -206,14 +216,82 @@ public class StudentController {
     @RequiresRoles("student")
     public R updateStudent(@RequestBody Student student) {
         Student studentDataBase = studentService.getById(student.getId());
-
-        String newPassword = student.getPassword();
-        if (null!=newPassword){
-            String newPasswordEncryption = new Md5Hash(newPassword,studentDataBase.getSalt(),Constant.HASHITERATIONS).toString();
-            student.setPassword(newPasswordEncryption);
-        }
         boolean flag = studentService.updateById(student);
-        return CRUDRUtils.updateR(flag);
+        Student newStudent = studentService.getById(studentDataBase.getId());
+        if (flag){
+            return R.ok("修改成功!").put("data",newStudent);
+        }else {
+            return R.error("修改失败!");
+        }
+    }
+
+    /**
+     * 修改密码
+     * @param userPassword     userPassword中的type: 0---学生  1---老师  2---公司  3---管理员
+     * @return
+     */
+    @PutMapping("/changePassword")
+    public R changePassword(@RequestBody UserPassword userPassword){
+        if (userPassword.getType()==0) {
+            Student studentDataBase = ShiroUtils.getStudentShiro();
+            // 对用户输入的原密码进行加盐散列2次变成密文和数据库中的密码进行对比
+            String encryptionPassword = new Md5Hash(userPassword.getOldPassword(), studentDataBase.getSalt(), Constant.HASHITERATIONS).toString();
+            if (encryptionPassword.equals(studentDataBase.getPassword())) {
+                // 获取用户的新密码
+                String newPassword = userPassword.getNewPassword();
+                // 对用户的新密码进行加密
+                String encryptionNewPassword = new Md5Hash(newPassword, studentDataBase.getSalt(), Constant.HASHITERATIONS).toString();
+                studentDataBase.setPassword(encryptionNewPassword);
+                boolean flag = studentService.updateById(studentDataBase);
+                if (flag) {
+                    return R.ok("修改密码成功！");
+                } else {
+                    return R.error("修改密码失败");
+                }
+            } else {
+                return R.error("你输入的原密码有误！");
+            }
+            
+        }else if (userPassword.getType()==1){
+            Teacher teacherDataBase = ShiroUtils.getTeacherShiro();
+            // 对用户输入的原密码进行加盐散列2次变成密文和数据库中的密码进行对比
+            String encryptionPassword = new Md5Hash(userPassword.getOldPassword(), teacherDataBase.getSalt(), Constant.HASHITERATIONS).toString();
+            if (encryptionPassword.equals(teacherDataBase.getPassword())) {
+                // 获取用户的新密码
+                String newPassword = userPassword.getNewPassword();
+                // 对用户的新密码进行加密
+                String encryptionNewPassword = new Md5Hash(newPassword, teacherDataBase.getSalt(), Constant.HASHITERATIONS).toString();
+                teacherDataBase.setPassword(encryptionNewPassword);
+                boolean flag = teacherService.updateById(teacherDataBase);
+                if (flag) {
+                    return R.ok("修改密码成功！");
+                } else {
+                    return R.error("修改密码失败");
+                }
+            } else {
+                return R.error("你输入的原密码有误！");
+            }
+        }else if (userPassword.getType() == 2){
+            Company companyDataBase = ShiroUtils.getCompanyShiro();
+            // 对用户输入的原密码进行加盐散列2次变成密文和数据库中的密码进行对比
+            String encryptionPassword = new Md5Hash(userPassword.getOldPassword(), companyDataBase.getSalt(), Constant.HASHITERATIONS).toString();
+            if (encryptionPassword.equals(companyDataBase.getPassword())) {
+                // 获取用户的新密码
+                String newPassword = userPassword.getNewPassword();
+                // 对用户的新密码进行加密
+                String encryptionNewPassword = new Md5Hash(newPassword, companyDataBase.getSalt(), Constant.HASHITERATIONS).toString();
+                companyDataBase.setPassword(encryptionNewPassword);
+                boolean flag = companyService.updateById(companyDataBase);
+                if (flag) {
+                    return R.ok("修改密码成功！");
+                } else {
+                    return R.error("修改密码失败");
+                }
+            } else {
+                return R.error("你输入的原密码有误！");
+            }
+        }
+        return null;
     }
 
 }
